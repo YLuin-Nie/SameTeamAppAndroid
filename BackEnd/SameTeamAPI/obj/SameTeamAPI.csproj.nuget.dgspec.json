@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\yluin\\PROJECTS\\SameTeamBob\\BackEnd\\SameTeamAPI\\SameTeamAPI.csproj": {}
+    "C:\\Users\\yluin\\PROJECTS\\SameTeamAppFull\\BackEnd\\SameTeamAPI\\SameTeamAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\yluin\\PROJECTS\\SameTeamBob\\BackEnd\\SameTeamAPI\\SameTeamAPI.csproj": {
+    "C:\\Users\\yluin\\PROJECTS\\SameTeamAppFull\\BackEnd\\SameTeamAPI\\SameTeamAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\yluin\\PROJECTS\\SameTeamBob\\BackEnd\\SameTeamAPI\\SameTeamAPI.csproj",
+        "projectUniqueName": "C:\\Users\\yluin\\PROJECTS\\SameTeamAppFull\\BackEnd\\SameTeamAPI\\SameTeamAPI.csproj",
         "projectName": "SameTeamAPI",
-        "projectPath": "C:\\Users\\yluin\\PROJECTS\\SameTeamBob\\BackEnd\\SameTeamAPI\\SameTeamAPI.csproj",
+        "projectPath": "C:\\Users\\yluin\\PROJECTS\\SameTeamAppFull\\BackEnd\\SameTeamAPI\\SameTeamAPI.csproj",
         "packagesPath": "C:\\Users\\yluin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\yluin\\PROJECTS\\SameTeamBob\\BackEnd\\SameTeamAPI\\obj\\",
+        "outputPath": "C:\\Users\\yluin\\PROJECTS\\SameTeamAppFull\\BackEnd\\SameTeamAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\yluin\\AppData\\Roaming\\NuGet\\NuGet.Config"
