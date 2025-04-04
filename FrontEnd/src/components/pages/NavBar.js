@@ -1,14 +1,16 @@
+// File Name: NavBar.js
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { logoutUser } from '../utils/localStorageUtils';
 
 const NavBar = ({ currentUser, setCurrentUser }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logoutUser();
+    localStorage.removeItem('token');
+    localStorage.removeItem('loggedInUser');
     setCurrentUser(null);
-    navigate('/'); // Redirect to home or sign-in page after logout
+    navigate('/'); // or navigate('/signin') if that's your login page
   };
 
   return (
@@ -18,17 +20,17 @@ const NavBar = ({ currentUser, setCurrentUser }) => {
           <>
             <li className="navbar-item">
               <Link to="/parent-dashboard" className="navbar-link">
-                <i className="fas fa-tachometer-alt"></i> {/* Dashboard icon */}
+                <i className="fas fa-tachometer-alt"></i>
               </Link>
             </li>
             <li className="navbar-item">
               <Link to="/add-chores" className="navbar-link">
-                <i className="fas fa-tasks"></i> {/* Add Chores icon */}
+                <i className="fas fa-tasks"></i>
               </Link>
             </li>
             <li className="navbar-item">
               <Link to="/parent-rewards" className="navbar-link">
-                <i className="fas fa-gift"></i> {/* Add Reward icon */}
+                <i className="fas fa-gift"></i>
               </Link>
             </li>
           </>
@@ -37,26 +39,25 @@ const NavBar = ({ currentUser, setCurrentUser }) => {
           <>
             <li className="navbar-item">
               <Link to="/child-dashboard" className="navbar-link">
-                <i className="fas fa-tachometer-alt"></i> {/* Dashboard icon */}
+                <i className="fas fa-tachometer-alt"></i>
               </Link>
             </li>
             <li className="navbar-item">
               <Link to="/chores-list" className="navbar-link">
-                <i className="fas fa-list"></i> {/* Your Chores icon */}
+                <i className="fas fa-list"></i>
               </Link>
             </li>
             <li className="navbar-item">
               <Link to="/child-rewards" className="navbar-link">
-                <i className="fas fa-gift"></i> {/* Child Rewards icon */}
+                <i className="fas fa-gift"></i>
               </Link>
             </li>
-
           </>
         )}
         {currentUser && (
           <li className="navbar-item">
             <Link to="/" onClick={handleLogout} className="navbar-link">
-              <i className="fas fa-sign-out-alt"></i> {/* Logout icon */}
+              <i className="fas fa-sign-out-alt"></i>
             </Link>
           </li>
         )}

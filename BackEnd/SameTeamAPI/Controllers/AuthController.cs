@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using SameTeamAPI.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace SameTeamAPI.Controllers
 {
@@ -23,28 +24,49 @@ namespace SameTeamAPI.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel login)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == login.Email);
+            var user = _context.Users
+                .FirstOrDefault(u => u.Email.ToLower() == login.Email.ToLower());
 
-            if (user == null || user.PasswordHash != login.Password) // Replace with hashed password check
-                return Unauthorized("Invalid credentials");
+            if (user == null)
+                return Unauthorized("User not found");
+
+            // ⚠️ TEMPORARY: Plain-text comparison for testing
+            if (user.PasswordHash != login.Password)
+                return Unauthorized("Invalid password");
 
             var token = GenerateJwtToken(user);
-            return Ok(new { token });
+
+            return Ok(new
+            {
+                token,
+                user = new
+                {
+                    user.UserId,
+                    user.Username,
+                    user.Email,
+                    user.Role,
+                    user.Points,
+                    user.TeamId
+                }
+            });
         }
+
 
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterModel model)
         {
-            if (_context.Users.Any(u => u.Email == model.Email))
+            if (_context.Users.Any(u => u.Email.ToLower() == model.Email.ToLower()))
             {
                 return Conflict("Email already exists.");
             }
 
+            var hashedPassword = new PasswordHasher<User>().HashPassword(null, model.Password);
+
             var user = new User
             {
                 Username = model.Username,
-                Email = model.Email,
-                PasswordHash = model.Password, // 🔐 We'll hash this later
+                Email = model.Email.ToLower(),
+                PasswordHash = hashedPassword,
                 Role = model.Role ?? "User",
                 Points = 0,
                 TotalPoints = 0,
@@ -87,11 +109,10 @@ namespace SameTeamAPI.Controllers
     }
 
     public class RegisterModel
-{
-    public string Username { get; set; }
-    public string Email { get; set; }
-    public string Password { get; set; }
-    public string? Role { get; set; } // optional
-}
-
+    {
+        public string Username { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string? Role { get; set; } // optional
+    }
 }

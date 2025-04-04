@@ -1,173 +1,179 @@
 // File Name: ParentRewards.js
 
 import React, { useState, useEffect } from "react";
-import { getUsers, saveUsers, getRedeemedRewards, storeRedeemedReward, addRewardAsCompletedChore, saveRewards, getRewards } from "../utils/localStorageUtils";
+import {
+  fetchUsers,
+  fetchRewards,
+  postReward,
+  updateReward,
+  deleteReward as deleteRewardAPI,
+  rewardAsChore,
+} from "../../api/api";
 
 function ParentRewards() {
-    const [children, setChildren] = useState([]);
-    const [selectedChild, setSelectedChild] = useState("");
-    
-    // Separate state for rewarding a child
-    const [rewardChildName, setRewardChildName] = useState("");
-    const [rewardChildPoints, setRewardChildPoints] = useState(10);
-    
-    // Separate state for defining new rewards
-    const [newRewardName, setNewRewardName] = useState("");
-    const [newRewardPoints, setNewRewardPoints] = useState(10);
-    
-    const [redeemedRewards, setRedeemedRewards] = useState([]);
-    const [rewards, setRewards] = useState([]);
-    const [editingReward, setEditingReward] = useState(null);
-    const [editedRewardName, setEditedRewardName] = useState("");
-    const [editedRewardCost, setEditedRewardCost] = useState(0);
+  const [children, setChildren] = useState([]);
+  const [selectedChild, setSelectedChild] = useState("");
+  const [rewardChildName, setRewardChildName] = useState("");
+  const [rewardChildPoints, setRewardChildPoints] = useState(10);
 
-    useEffect(() => {
-        const users = getUsers();
-        const childUsers = users.filter(user => user.role === "Child");
-        setChildren(childUsers);
+  const [newRewardName, setNewRewardName] = useState("");
+  const [newRewardPoints, setNewRewardPoints] = useState(10);
 
-        // Load rewards and redeemed rewards
-        setRewards(getRewards());
-        setRedeemedRewards(getRedeemedRewards());
-    }, []);
+  const [rewards, setRewards] = useState([]);
+  const [editingReward, setEditingReward] = useState(null);
+  const [editedRewardName, setEditedRewardName] = useState("");
+  const [editedRewardCost, setEditedRewardCost] = useState(0);
 
-    const rewardChild = () => {
-        if (!selectedChild || !rewardChildName || rewardChildPoints <= 0) {
-            alert("Please select a child, enter a reward, and set a valid point amount.");
-            return;
-        }
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const users = await fetchUsers();
+        setChildren(users.filter((u) => u.role === "Child"));
 
-        const users = getUsers();
-        const updatedUsers = users.map(user => {
-            if (user.username === selectedChild) {
-                const newPoints = (user.points || 0) + rewardChildPoints;
-                return { ...user, points: newPoints };
-            }
-            return user;
-        });
-
-        saveUsers(updatedUsers);
-
-        // ✅ Store reward as a completed chore
-        addRewardAsCompletedChore(selectedChild, rewardChildName, rewardChildPoints);
-
-        alert(`Successfully rewarded ${rewardChildPoints} points to ${selectedChild} for ${rewardChildName}!`);
-        
-        setSelectedChild("");
-        setRewardChildName("");
-        setRewardChildPoints(10);
+        const rewardsData = await fetchRewards();
+        setRewards(rewardsData);
+      } catch (err) {
+        console.error("Error loading users or rewards:", err);
+      }
     };
+    loadData();
+  }, []);
 
-    const addReward = () => {
-        if (!newRewardName.trim() || newRewardPoints <= 0) {
-            alert("Please enter a valid reward name and cost.");
-            return;
-        }
+  const rewardChild = async () => {
+    if (!selectedChild || !rewardChildName || rewardChildPoints <= 0) {
+      alert("Please select a child, enter a reward, and set a valid point amount.");
+      return;
+    }
 
-        const newReward = { id: Date.now(), name: newRewardName, cost: newRewardPoints };
-        const updatedRewards = [...rewards, newReward];
+    try {
+      const rewardChore = {
+        choreText: rewardChildName,
+        points: rewardChildPoints,
+        assignedTo: parseInt(selectedChild),
+        dateAssigned: new Date().toISOString(),
+        completed: true,
+      };
 
-        setRewards(updatedRewards);
-        saveRewards(updatedRewards); // ✅ Store rewards in localStorage
+      await rewardAsChore(rewardChore);
+      alert(`Rewarded ${rewardChildPoints} points to ${selectedChild} for ${rewardChildName}!`);
 
-        setNewRewardName("");
-        setNewRewardPoints(10);
-    };
+      setSelectedChild("");
+      setRewardChildName("");
+      setRewardChildPoints(10);
+    } catch (err) {
+      console.error("Error rewarding child:", err);
+      alert("Failed to reward. Check backend.");
+    }
+  };
 
-    const deleteReward = (id) => {
-        const updatedRewards = rewards.filter(reward => reward.id !== id);
-        setRewards(updatedRewards);
-        saveRewards(updatedRewards);
-    };
+  const addReward = async () => {
+    if (!newRewardName.trim() || newRewardPoints <= 0) {
+      alert("Please enter a valid reward name and cost.");
+      return;
+    }
 
-    const startEdit = (reward) => {
-        setEditingReward(reward.id);
-        setEditedRewardName(reward.name);
-        setEditedRewardCost(reward.cost);
-    };
+    try {
+      const newReward = {
+        name: newRewardName,
+        cost: newRewardPoints,
+      };
+      const saved = await postReward(newReward);
+      setRewards([...rewards, saved]);
 
-    const saveEdit = () => {
-        const updatedRewards = rewards.map(reward => 
-            reward.id === editingReward ? { ...reward, name: editedRewardName, cost: editedRewardCost } : reward
-        );
-        setRewards(updatedRewards);
-        saveRewards(updatedRewards);
-        setEditingReward(null);
-        setEditedRewardName("");
-        setEditedRewardCost(0);
-    };
+      setNewRewardName("");
+      setNewRewardPoints(10);
+    } catch (err) {
+      console.error("Error adding reward:", err);
+    }
+  };
 
-    return (
-        <div className="rewards-container">
-            <h2>Parent Rewards Management</h2>
+  const saveEdit = async () => {
+    try {
+      const updated = await updateReward(editingReward, {
+        id: editingReward,
+        name: editedRewardName,
+        cost: editedRewardCost,
+      });
 
-            <h3>Reward A Child (Extra Points)</h3>
-            <select value={selectedChild} onChange={(e) => setSelectedChild(e.target.value)}>
-                <option value="">Select a child...</option>
-                {children.map(child => (
-                    <option key={child.username} value={child.username}>{child.username}</option>
-                ))}
-            </select>
+      setRewards(rewards.map(r => (r.id === editingReward ? updated : r)));
+      setEditingReward(null);
+      setEditedRewardName("");
+      setEditedRewardCost(0);
+    } catch (err) {
+      console.error("Failed to save reward:", err);
+    }
+  };
 
-            <label>Reward Name:</label>
-            <input type="text" value={rewardChildName} onChange={(e) => setRewardChildName(e.target.value)} placeholder="Enter reward (e.g., Extra Playtime)" />
+  const deleteReward = async (id) => {
+    try {
+      await deleteRewardAPI(id);
+      setRewards(rewards.filter(r => r.id !== id));
+    } catch (err) {
+      console.error("Failed to delete reward:", err);
+    }
+  };
 
-            <label>Points:</label>
-            <input type="number" value={rewardChildPoints} onChange={(e) => setRewardChildPoints(Number(e.target.value))} min="1" />
+  return (
+    <div className="rewards-container">
+      <h2>Parent Rewards Management</h2>
 
-            <button onClick={rewardChild}>Reward Points</button>
+      <h3>Reward A Child (Extra Points)</h3>
+      <select value={selectedChild} onChange={(e) => setSelectedChild(e.target.value)}>
+        <option value="">Select a child...</option>
+        {children.map(child => (
+          <option key={child.userId} value={child.userId}>
+            {child.username}
+          </option>
+        ))}
+      </select>
 
-            <hr />
+      <label>Reward Name:</label>
+      <input type="text" value={rewardChildName} onChange={(e) => setRewardChildName(e.target.value)} placeholder="e.g., Extra Playtime" />
 
-            <h3>Define New Rewards</h3>
-            <input type="text" placeholder="Reward Name" value={newRewardName} onChange={(e) => setNewRewardName(e.target.value)} />
-            <input type="number" placeholder="Cost" value={newRewardPoints} onChange={(e) => setNewRewardPoints(Number(e.target.value))} />
-            <button onClick={addReward}>Add Reward</button>
+      <label>Points:</label>
+      <input type="number" value={rewardChildPoints} onChange={(e) => setRewardChildPoints(Number(e.target.value))} min="1" />
 
-            <hr />
+      <button onClick={rewardChild}>Reward Points</button>
 
-            <h3>Manage Rewards</h3>
-            <ul className="reward-list">
-                {rewards.length === 0 ? <p>No rewards defined yet.</p> :
-                    rewards.map((reward) => (
-                        <li key={reward.id} className="reward-item">
-                            {editingReward === reward.id ? (
-                                <>
-                                    <input type="text" value={editedRewardName} onChange={(e) => setEditedRewardName(e.target.value)} />
-                                    <input type="number" value={editedRewardCost} onChange={(e) => setEditedRewardCost(Number(e.target.value))} />
-                                    <button title="Save Changes" onClick={saveEdit}>💾</button>
-                                    <button title="Cancel Editing" onClick={() => setEditingReward(null)}>❌</button>
-                                </>
-                            ) : (
-                                <>
-                                    <span>{reward.name} - {reward.cost} Points</span>
-                                    <div className="reward-actions">
-                                        <button title="Edit Reward" onClick={() => startEdit(reward)}>✏️</button>
-                                        <button title="Delete Reward" onClick={() => deleteReward(reward.id)}>🗑️</button>
-                                    </div>
-                                </>
-                            )}
-                        </li>
-                    ))
-                }
-            </ul>
+      <hr />
 
-            <hr />
+      <h3>Define New Rewards</h3>
+      <input type="text" placeholder="Reward Name" value={newRewardName} onChange={(e) => setNewRewardName(e.target.value)} />
+      <input type="number" placeholder="Cost" value={newRewardPoints} onChange={(e) => setNewRewardPoints(Number(e.target.value))} />
+      <button onClick={addReward}>Add Reward</button>
 
-            <h3>Redeemed Rewards History</h3>
-            {redeemedRewards.length === 0 ? (
-                <p>No rewards redeemed yet.</p>
-            ) : (
-                <ul className="redeemed-reward-list">
-                    {redeemedRewards.map(reward => (
-                        <li key={reward.id}>
-                            {reward.username} redeemed "{reward.rewardName}" for {reward.pointsSpent} points on {new Date(reward.date).toLocaleDateString()}
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
-    );
+      <hr />
+
+      <h3>Manage Rewards</h3>
+      <ul className="reward-list">
+        {rewards.length === 0 ? <p>No rewards defined yet.</p> :
+          rewards.map((reward) => (
+            <li key={reward.id} className="reward-item">
+              {editingReward === reward.id ? (
+                <>
+                  <input type="text" value={editedRewardName} onChange={(e) => setEditedRewardName(e.target.value)} />
+                  <input type="number" value={editedRewardCost} onChange={(e) => setEditedRewardCost(Number(e.target.value))} />
+                  <button onClick={saveEdit}>💾</button>
+                  <button onClick={() => setEditingReward(null)}>❌</button>
+                </>
+              ) : (
+                <>
+                  <span>{reward.name} - {reward.cost} Points</span>
+                  <div className="reward-actions">
+                    <button onClick={() => {
+                      setEditingReward(reward.id);
+                      setEditedRewardName(reward.name);
+                      setEditedRewardCost(reward.cost);
+                    }}>✏️</button>
+                    <button onClick={() => deleteReward(reward.id)}>🗑️</button>
+                  </div>
+                </>
+              )}
+            </li>
+          ))}
+      </ul>
+    </div>
+  );
 }
 
 export default ParentRewards;

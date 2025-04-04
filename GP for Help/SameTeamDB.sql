@@ -1,10 +1,22 @@
--- Create the SameTeamDB database
+/********************************************************
+* This script creates the database  
+*********************************************************/
+-- Drop the database if it already exists
+IF EXISTS (SELECT name FROM sys.databases WHERE name = 'SameTeamDB')
+    DROP DATABASE SameTeamDB;
+GO
+
+-- Create a new database
 CREATE DATABASE SameTeamDB;
 GO
 
+-- Use the new database
 USE SameTeamDB;
 GO
 
+/********************************************************
+* This section creates the Tables
+*********************************************************/
 -- Teams Table
 CREATE TABLE Teams (
     TeamID INT IDENTITY(1,1) PRIMARY KEY,
@@ -62,3 +74,32 @@ CREATE TABLE CompletedChores (
     CompletionDate DATETIME DEFAULT GETDATE()
 );
 GO
+
+/********************************************************
+* This section populates the Tables
+*********************************************************/
+SET IDENTITY_INSERT Teams ON;
+INSERT INTO Teams (TeamID, TeamName)
+VALUES
+(1, 'Avengers'),
+(2, 'Justice'),
+(3, 'Supers');
+SET IDENTITY_INSERT Teams OFF;
+
+SET IDENTITY_INSERT Rewards ON;
+INSERT INTO Rewards (RewardID, Name, Cost)
+VALUES 
+    (1, 'Ice Cream', 10),
+    (2, 'Movie Night', 25),
+    (3, 'Extra Screen Time', 15);
+SET IDENTITY_INSERT Rewards OFF;
+	
+SET IDENTITY_INSERT Users ON;
+INSERT INTO Users (userId, username, email, passwordHash, role, points, totalPoints, teamId)
+VALUES 
+    (1, 'Bansari', 'Bansari@example.com', 'Ban123', 'Parent', 0, 0, 1),
+    (2, 'Yen', 'Yen@example.com', 'Bob123', 'Parent', 0, 0, 1),
+    (3, 'Luna', 'Luna@example.com', 'Bob123', 'Child', 0, 0, 1),
+	(4, 'Bob', 'Bob@example.com', 'Bob123', 'Child', 0, 0, 1);
+SET IDENTITY_INSERT Users OFF;
+

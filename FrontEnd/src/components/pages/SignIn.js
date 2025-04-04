@@ -1,60 +1,61 @@
 // File Name: SignIn.js
 
-import React, { useState } from "react";
-import { authenticateUser } from "../utils/localStorageUtils"; // Ensure correct import path
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/signup.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { loginUser, fetchUsers } from "../../api/api";
 
 const SignIn = ({ onSignInSuccess }) => {
-  const [formData, setFormData] = useState({ email: "", password: "" }); // State for login form inputs
-  const [error, setError] = useState(""); // State to track login errors
-  const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
   const navigate = useNavigate();
 
-  // Handle Login Form Submission
-  const handleLogin = (e) => {
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const users = await fetchUsers();
+        setAllUsers(users);
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+        setError("Unable to connect to server.");
+      }
+    };
+    loadUsers();
+  }, []);
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    
-    // Ensure email is a string before calling authentication
-    if (typeof formData.email !== "string") {
-      setError("Invalid email format.");
-      console.error("Invalid email type:", formData.email);
-      return;
-    }
-
-    // Trim email to remove accidental spaces
+    setError("");
+  
     const trimmedEmail = formData.email.trim();
-    console.log("Attempting to log in with:", trimmedEmail);
-
-    // Validate email input
     if (!trimmedEmail || !formData.password) {
       setError("Email and password are required.");
       return;
     }
-
-    // Authenticate user
-    const user = authenticateUser(trimmedEmail, formData.password);
-
-    if (!user) {
-      setError("Invalid email or password."); // Show error if authentication fails
-      console.log("Authentication failed for:", trimmedEmail);
-      return;
-    }
-
-    console.log("User authenticated:", user);
-
-    // Store authenticated user in localStorage
-    localStorage.setItem("loggedInUser", JSON.stringify(user));
-
-    // Ensure we pass email and password correctly
-    if (onSignInSuccess) {
-      onSignInSuccess(trimmedEmail, formData.password); // FIXED: Passing email & password correctly
-    } else {
-      console.error("onSignInSuccess function is not provided");
+  
+    try {
+      const result = await loginUser(trimmedEmail, formData.password);
+      const { token, user } = result;
+  
+      localStorage.setItem("token", token);
+      localStorage.setItem("loggedInUser", JSON.stringify(user));
+  
+      if (onSignInSuccess) {
+        onSignInSuccess(trimmedEmail, formData.password);
+      } else {
+        const destination = user.role === "Child" ? "/child-dashboard" : "/parent-dashboard";
+        navigate(destination);
+      }
+    } catch (err) {
+      console.error("Login failed:", err);
+      setError("Invalid email or password.");
     }
   };
+  
 
   return (
     <div className="signup-container">
@@ -62,39 +63,41 @@ const SignIn = ({ onSignInSuccess }) => {
         <FontAwesomeIcon icon={faArrowLeft} onClick={() => navigate(-1)} className="back-arrow" />
         <h2>Sign In</h2>
       </div>
-      {error && <p style={{ color: "red" }}>{error}</p>} {/* Show error if login fails */}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
       <form onSubmit={handleLogin}>
-        {/* Email Input */}
-        <input 
-          type="email" 
-          placeholder="Email" 
+        <input
+          type="email"
+          placeholder="Email"
           value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })} 
-          required 
+          onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
+          required
         />
-        {/* Password Input */}
+
         <div className="password-container">
-          <input 
-            type={showPassword ? "text" : "password"} 
-            placeholder="Password" 
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
             value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })} 
-            required 
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            required
           />
-          <span 
-            onClick={() => setShowPassword(!showPassword)} 
-            className={`eye-icon ${showPassword ? 'open' : 'closed'}`}
+          <span
+            onClick={() => setShowPassword(!showPassword)}
+            className={`eye-icon ${showPassword ? "open" : "closed"}`}
           >
             <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
           </span>
         </div>
-        {/* Sign In Button */}
+
         <button type="submit" className="auth-button">Sign In</button>
       </form>
-      {/* Sign Up Section Positioned Closer */}
+
       <div className="signup-section">
         <p>Don't have an account?</p>
-        <button onClick={() => navigate("/signup")} className="auth-button">Sign Up</button>
+        <button onClick={() => navigate("/signup")} className="auth-button">
+          Sign Up
+        </button>
       </div>
     </div>
   );

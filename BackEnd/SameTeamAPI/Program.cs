@@ -62,6 +62,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -69,7 +79,7 @@ var app = builder.Build();
 
 // ✅ Swagger UI Middleware
 if (app.Environment.IsDevelopment())
-{
+{   
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
@@ -79,10 +89,14 @@ if (app.Environment.IsDevelopment())
 }
 
 
-// ✅ Middleware
-// app.UseHttpsRedirection();
-app.UseAuthentication();
+// ✅ Middleware: ⬇️ VERY IMPORTANT ORDER
+app.UseRouting();                      // <-- Make sure routing is enabled before anything
+app.UseCors("AllowFrontend");         // <-- CORS before any redirection or auth
+// app.UseHttpsRedirection();        // keep this OFF for now
 app.UseAuthorization();
 app.MapControllers();
+
+
+
 
 app.Run();
