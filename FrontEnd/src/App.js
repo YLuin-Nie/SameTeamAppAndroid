@@ -27,7 +27,12 @@ function App() {
   useEffect(() => {
     const storedUser = localStorage.getItem("loggedInUser");
     if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.error("Invalid JSON in loggedInUser:", err);
+        localStorage.removeItem("loggedInUser");
+      }
     }
 
     const storedDarkMode = localStorage.getItem("darkMode") === "true";
@@ -51,11 +56,17 @@ function App() {
     useEffect(() => {
       const storedUser = localStorage.getItem("loggedInUser");
       if (storedUser && location.pathname === "/") {
-        const user = JSON.parse(storedUser);
-        if (user.role === "Parent") {
-          navigate("/parent-dashboard");
-        } else {
-          navigate("/child-dashboard");
+        try {
+          const user = JSON.parse(storedUser);
+          if (user.role === "Parent") {
+            navigate("/parent-dashboard");
+          } else {
+            navigate("/child-dashboard");
+          }
+        } catch (err) {
+          console.error("Failed to parse stored user:", err);
+          localStorage.removeItem("loggedInUser");
+          navigate("/signin");
         }
       }
     }, [navigate, location.pathname]);
@@ -68,12 +79,9 @@ function App() {
 
       try {
         const response = await loginUser(email, password);
-
         const { token, user } = response;
-        if (token) {
-          localStorage.setItem("token", token);
-        }
 
+        if (token) localStorage.setItem("token", token);
         if (user) {
           localStorage.setItem("loggedInUser", JSON.stringify(user));
           setCurrentUser(user);

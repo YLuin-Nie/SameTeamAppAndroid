@@ -1,6 +1,6 @@
 // File Name: SignUp.js
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/signup.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -33,7 +33,13 @@ const SignUp = () => {
     setErrors("");
 
     try {
-      const res = await api.post("/auth/signup", formData);
+      const response = await api.post("/Auth/register", formData);
+      const { token, user } = response.data;
+
+      // Store token and user in localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("loggedInUser", JSON.stringify(user));
+
       alert("Sign-up successful! Proceeding to profile setup...");
       navigate("/profile-setup");
     } catch (err) {

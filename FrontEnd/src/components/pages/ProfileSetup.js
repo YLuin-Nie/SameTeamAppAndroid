@@ -1,18 +1,26 @@
 // File Name: ProfileSetup.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCurrentUser } from '../../utils/auth';
-import { fetchUsers, updateUser } from '../../api/api';
+import { updateUser } from '../../api/api';
 import "../styles/signup.css";
 
 function ProfileSetup() {
   const navigate = useNavigate();
-  const currentUser = getCurrentUser();
+
+  const storedUser = localStorage.getItem("loggedInUser");
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
 
   const [role, setRole] = useState('');
   const [teamName, setTeamName] = useState('');
   const [profileComplete, setProfileComplete] = useState(false);
+
+  // ✅ Handle redirect inside useEffect
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/signin");
+    }
+  }, [currentUser, navigate]);
 
   const handleRoleSelection = (selectedRole) => {
     setRole(selectedRole);
@@ -25,11 +33,6 @@ function ProfileSetup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!currentUser) {
-      alert("No user logged in.");
-      return;
-    }
-
     if (role === 'parent' && !teamName.trim()) {
       alert("Team name required for parents.");
       return;
@@ -39,7 +42,7 @@ function ProfileSetup() {
       const updatedUser = {
         ...currentUser,
         role: role === 'parent' ? 'Parent' : 'Child',
-        teamId: teamName ? 1 : null // hardcoded team ID unless you're handling dynamic creation
+        teamId: teamName ? 1 : null, // Replace with dynamic team logic if needed
       };
 
       await updateUser(currentUser.userId, updatedUser);
@@ -51,11 +54,14 @@ function ProfileSetup() {
     }
   };
 
-  if (profileComplete) {
-    return role === 'parent'
-      ? navigate('/parent-dashboard')
-      : navigate('/child-dashboard');
-  }
+  useEffect(() => {
+    if (profileComplete) {
+      navigate(role === 'parent' ? '/parent-dashboard' : '/child-dashboard');
+    }
+  }, [profileComplete, role, navigate]);
+
+  // Don’t render until currentUser is confirmed
+  if (!currentUser) return null;
 
   return (
     <div>
@@ -63,7 +69,7 @@ function ProfileSetup() {
         <h2>Profile Setup</h2>
       </div>
 
-      <p>Welcome, {currentUser ? currentUser.username : 'User'}!</p>
+      <p>Welcome, {currentUser.username}!</p>
 
       <form onSubmit={handleSubmit}>
         <div>
