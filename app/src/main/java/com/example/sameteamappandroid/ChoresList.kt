@@ -1,0 +1,128 @@
+package com.example.sameteamappandroid
+
+import android.os.Bundle
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import com.example.sameteamappandroid.databinding.ActivityChoresListBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.time.LocalDate
+
+class ChoresListActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityChoresListBinding
+    private var currentUserId: Int = -1
+    private var allChores: List<Chore> = emptyList()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityChoresListBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        currentUserId = prefs.getInt("userId", -1)
+
+        if (currentUserId != -1) {
+            fetchChores()
+        } else {
+            Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun fetchChores() {
+        RetrofitClient.instance.fetchChores().enqueue(object : Callback<List<Chore>> {
+            override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
+                if (response.isSuccessful) {
+                    allChores = response.body()?.filter { it.assignedTo == currentUserId } ?: emptyList()
+                    displayChores()
+                } else {
+                    Toast.makeText(this@ChoresListActivity, "Failed to load chores", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
+                Toast.makeText(this@ChoresListActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun displayChores() {
+        val today = LocalDate.now()
+        val sevenDaysAgo = today.minusDays(7)
+
+        val pending = allChores.filter { !it.completed }
+        val completed = allChores.filter { it.completed && LocalDate.parse(it.dateAssigned) >= sevenDaysAgo }
+
+        val totalPoints = completed.sumOf { it.points }
+        val completionPercent = if (allChores.isNotEmpty()) (completed.size * 100 / allChores.size) else 0
+
+        binding.pointsTextView.text = getString(R.string.your_points) + " $totalPoints"
+        binding.progressTextView.text = getString(R.string.task_progress) + " $completionPercent%"
+        binding.progressBar.progress = completionPercent
+
+        binding.pendingLayout.removeAllViews()
+        binding.completedLayout.removeAllViews()
+
+        if (pending.isEmpty()) {
+            binding.pendingLayout.addView(TextView(this).apply { text = getString(R.string.no_pending) })
+        } else {
+            pending.forEach { chore ->
+                binding.pendingLayout.addView(createChoreItem(chore, true))
+            }
+        }
+
+        if (completed.isEmpty()) {
+            binding.completedLayout.addView(TextView(this).apply { text = getString(R.string.no_completed) })
+        } else {
+            completed.forEach { chore ->
+                binding.completedLayout.addView(createChoreItem(chore, false))
+            }
+        }
+    }
+
+    private fun createChoreItem(chore: Chore, isPending: Boolean): LinearLayout {
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, 16, 0, 16)
+        }
+
+        val choreText = TextView(this).apply {
+            text = "${chore.choreText} (${chore.points} pts)"
+            if (!isPending) paint.isStrikeThruText = true
+        }
+
+        val dateText = TextView(this).apply {
+            text = if (isPending) "Due: ${chore.dateAssigned}" else "Completed on: ${chore.dateAssigned}"
+        }
+
+        val actionButton = Button(this).apply {
+            text = getString(if (isPending) R.string.complete_button else R.string.undo_button)
+            setOnClickListener {
+                toggleCompletion(chore)
+            }
+        }
+
+        layout.addView(choreText)
+        layout.addView(dateText)
+        layout.addView(actionButton)
+        return layout
+    }
+
+    private fun toggleCompletion(chore: Chore) {
+        val updated = chore.copy(completed = !chore.completed)
+        RetrofitClient.instance.completeChore(chore.choreId, updated).enqueue(object : Callback<Chore> {
+            override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
+                if (response.isSuccessful) {
+                    fetchChores()
+                } else {
+                    Toast.makeText(this@ChoresListActivity, "Failed to update chore", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Chore>, t: Throwable) {
+                Toast.makeText(this@ChoresListActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+}

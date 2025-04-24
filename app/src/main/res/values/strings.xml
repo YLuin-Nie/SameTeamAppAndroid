@@ -1,4 +1,5 @@
 <resources>
+    <!-- Main -->
     <string name="app_name">SameTeamAppAndroid</string>
     <string name="sign_in">Sign In</string>
     <string name="sign_up">Sign Up</string>
@@ -26,4 +27,76 @@
     <string name="processing">Processing...</string>
     <string name="sign_up_success">Sign-up successful! Please sign in to continue.</string>
     <string name="signup_error_default">Something went wrong.</string>
+
+    <!-- AddChore.kt -->
+    <string name="add_chore">Add Chore</string>
+    <string name="chore_hint">Chore Description</string>
+    <string name="points_hint">Points</string>
+    <string name="date_hint">Assign Date (YYYY-MM-DD)</string>
+    <string name="assign_to_hint">Assign To</string>
+    <string name="pending_chores">Pending Chores</string>
+    <string name="completed_chores">Completed Chores (Last 7 Days)</string>
+    <string name="chore_success">Chore added!</string>
+    <string name="chore_fail">Failed to add chore</string>
+
+    <!-- ChoresList.kt -->
+    <string name="your_chores">Your Chores</string>
+    <string name="your_points">Your Points:</string>
+    <string name="task_progress">Task Completion Progress:</string>
+    <string name="no_pending">No pending chores assigned.</string>
+    <string name="no_completed">No completed chores in the last 7 days.</string>
+    <string name="complete_button">✔️ Complete</string>
+    <string name="undo_button">🔄 Undo</string>
+
+    <!-- ParentRewards -->
+    <string name="parent_rewards_title">Parent Rewards Management</string>
+    <string name="reward_child_title">Reward A Child (Extra Points)</string>
+    <string name="select_child">Select a child...</string>
+    <string name="reward_name_label">Reward Name:</string>
+    <string name="points_label">Points:</string>
+    <string name="reward_button">Reward Points</string>
+    <string name="define_new_rewards">Define New Rewards</string>
+    <string name="add_reward_button">Add Reward</string>
+    <string name="manage_rewards">Manage Rewards</string>
+    <string name="no_rewards">No rewards defined yet.</string>
+    <string name="save">💾</string>
+    <string name="cancel">❌</string>
+    <string name="edit">✏️</string>
+    <string name="delete">🗑️</string>
+
+    <!-- ChildRewards -->
+    <string name="child_rewards_title">Available Rewards</string>
+    <string name="unspent_points">Unspent Points:</string>
+    <string name="no_rewards_available">No rewards available.</string>
+    <string name="redeem_button">Redeem</string>
+    <string name="redeemed_history_title">Redeemed Rewards History</string>
+    <string name="no_redemptions">You havent redeemed any rewards yet.</string>
+    <string name="redeemed_on">Redeemed on:</string>
+    <string name="not_enough_points">Not enough points.</string>
+    <string name="redemption_success">You redeemed:</string>
+    <string name="redemption_failed">Could not redeem reward.</string>
+
+    <!-- Dashboards -->
+    <string name="child_dashboard_title">Child Dashboard</string>
+    <string name="parent_dashboard_title">Parent Dashboard</string>
+    <string name="total_points">Total Points Earned:</string>
+    <string name="unspent_points_label">Unspent Points:</string>
+    <string name="upcoming_chores">Upcoming Chores (Next 7 Days)</string>
+    <string name="no_upcoming_chores">No upcoming chores.</string>
+    <string name="chores_for_date">Chores for</string>
+    <string name="no_chores_for_date">No chores for this date.</string>
+    <string name="team_label">Team:</string>
+    <string name="children_levels">Children's Levels</string>
+    <string name="add_child">Add Child</string>
+    <string name="child_email_label">Child's Email:</string>
+    <string name="cancel_button">Cancel</string>
+    <string-array name="levels_array">
+        <item>Level 1</item>
+        <item>Level 2</item>
+        <item>Level 3</item>
+        <item>Level 4</item>
+        <item>Level 5</item>
+    </string-array>
+
+
 </resources>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Title -->
+        <TextView
+            android:text="@string/parent_rewards_title"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- Reward a Child -->
+        <TextView android:text="@string/reward_child_title" />
+
+        <Spinner
+            android:id="@+id/childSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
+
+        <EditText
+            android:id="@+id/rewardNameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="58dp"
+            android:hint="@string/reward_name_label" />
+
+        <EditText
+            android:id="@+id/rewardPointsEditText"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="@string/points_label"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/rewardButton"
+            android:text="@string/reward_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#888"
+            android:layout_marginVertical="16dp" />
+
+        <!-- Define New Rewards -->
+        <TextView android:text="@string/define_new_rewards" />
+
+        <EditText
+            android:id="@+id/newRewardNameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:hint="Reward Name" />
+
+        <EditText
+            android:id="@+id/newRewardPointsEditText"
+            android:layout_width="match_parent"
+            android:layout_height="61dp"
+            android:hint="Cost"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/addRewardButton"
+            android:text="@string/add_reward_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Manage Rewards -->
+        <TextView
+            android:text="@string/manage_rewards"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp" />
+
+        <LinearLayout
+            android:id="@+id/rewardListLayout"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:orientation="vertical" />
+
+    </LinearLayout>
+</ScrollView>
