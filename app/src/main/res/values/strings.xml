@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">SameTeamAppAndroid</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="toggle_dark_mode">Toggle Dark Mode</string>
+    <string name="logo_description">App Logo</string>
+
+    <!-- Sign In -->
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="error_empty_fields">Please fill in all fields</string>
+    <string name="logging_in">Logging in...</string>
+    <string name="dont_have_account">Dont have an account?</string>
+    <string name="show_password">Show Password</string>
+    <string name="hide_password">Hide Password</string>
+
+    <!-- Sign Up -->
+    <string name="username">Username</string>
+    <string name="select_role">Select Role:</string>
+    <string name="parent">Parent</string>
+    <string name="child">Child</string>
+    <string name="team_name">Team Name</string>
+    <string name="team_password">Team Password</string>
+    <string name="processing">Processing...</string>
+    <string name="sign_up_success">Sign-up successful! Please sign in to continue.</string>
+    <string name="signup_error_default">Something went wrong.</string>
+</resources>
