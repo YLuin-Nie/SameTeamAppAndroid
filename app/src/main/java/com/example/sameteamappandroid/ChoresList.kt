@@ -7,9 +7,10 @@ import com.example.sameteamappandroid.databinding.ActivityChoresListBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.time.LocalDate
+import org.threeten.bp.LocalDate
 
-class ChoresListActivity : AppCompatActivity() {
+
+class ChoresList : AppCompatActivity() {
 
     private lateinit var binding: ActivityChoresListBinding
     private var currentUserId: Int = -1
@@ -37,12 +38,12 @@ class ChoresListActivity : AppCompatActivity() {
                     allChores = response.body()?.filter { it.assignedTo == currentUserId } ?: emptyList()
                     displayChores()
                 } else {
-                    Toast.makeText(this@ChoresListActivity, "Failed to load chores", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ChoresList, "Failed to load chores", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
-                Toast.makeText(this@ChoresListActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ChoresList, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -116,12 +117,12 @@ class ChoresListActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     fetchChores()
                 } else {
-                    Toast.makeText(this@ChoresListActivity, "Failed to update chore", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ChoresList, "Failed to update chore", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<Chore>, t: Throwable) {
-                Toast.makeText(this@ChoresListActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ChoresList, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }

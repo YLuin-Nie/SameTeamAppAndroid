@@ -4,16 +4,16 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sameteamappandroid.databinding.ActivityParentRewardsBinding
+import org.threeten.bp.LocalDate
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class ParentRewardsActivity : AppCompatActivity() {
+class ParentRewards : AppCompatActivity() {
 
     private lateinit var binding: ActivityParentRewardsBinding
     private lateinit var children: List<User>
     private lateinit var rewards: MutableList<Reward>
-    private var editingRewardId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,11 +31,10 @@ class ParentRewardsActivity : AppCompatActivity() {
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
                 if (response.isSuccessful) {
                     children = response.body()?.filter { it.role == "Child" } ?: emptyList()
-                    val adapter = ArrayAdapter(this@ParentRewardsActivity, android.R.layout.simple_spinner_item, children.map { it.username })
+                    val adapter = ArrayAdapter(this@ParentRewards, android.R.layout.simple_spinner_item, children.map { it.username })
                     binding.childSpinner.adapter = adapter
                 }
             }
-
             override fun onFailure(call: Call<List<User>>, t: Throwable) {}
         })
 
@@ -46,7 +45,6 @@ class ParentRewardsActivity : AppCompatActivity() {
                     displayRewards()
                 }
             }
-
             override fun onFailure(call: Call<List<Reward>>, t: Throwable) {}
         })
     }
@@ -65,17 +63,16 @@ class ParentRewardsActivity : AppCompatActivity() {
             choreText = name,
             points = points,
             assignedTo = children[selectedIndex].userId,
-            dateAssigned = java.time.LocalDate.now().toString(),
+            dateAssigned = LocalDate.now().toString(),
             completed = true
         )
 
         RetrofitClient.instance.rewardAsChore(chore).enqueue(object : Callback<Chore> {
             override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
-                Toast.makeText(this@ParentRewardsActivity, "Rewarded!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ParentRewards, "Rewarded!", Toast.LENGTH_SHORT).show()
             }
-
             override fun onFailure(call: Call<Chore>, t: Throwable) {
-                Toast.makeText(this@ParentRewardsActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ParentRewards, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -97,7 +94,6 @@ class ParentRewardsActivity : AppCompatActivity() {
                     displayRewards()
                 }
             }
-
             override fun onFailure(call: Call<Reward>, t: Throwable) {}
         })
     }
@@ -136,12 +132,11 @@ class ParentRewardsActivity : AppCompatActivity() {
                                     val index = rewards.indexOfFirst { it.id == reward.id }
                                     rewards[index] = response.body()!!
                                     displayRewards()
-                                    Toast.makeText(this@ParentRewardsActivity, "Reward updated", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this@ParentRewards, "Reward updated", Toast.LENGTH_SHORT).show()
                                 }
                             }
-
                             override fun onFailure(call: Call<Reward>, t: Throwable) {
-                                Toast.makeText(this@ParentRewardsActivity, "Update failed", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@ParentRewards, "Update failed", Toast.LENGTH_SHORT).show()
                             }
                         })
                     }
@@ -155,11 +150,10 @@ class ParentRewardsActivity : AppCompatActivity() {
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
                             rewards.removeAll { it.id == reward.id }
                             displayRewards()
-                            Toast.makeText(this@ParentRewardsActivity, "Reward deleted", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@ParentRewards, "Reward deleted", Toast.LENGTH_SHORT).show()
                         }
-
                         override fun onFailure(call: Call<Void>, t: Throwable) {
-                            Toast.makeText(this@ParentRewardsActivity, "Delete failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@ParentRewards, "Delete failed", Toast.LENGTH_SHORT).show()
                         }
                     })
                 }
@@ -172,5 +166,4 @@ class ParentRewardsActivity : AppCompatActivity() {
             binding.rewardListLayout.addView(container)
         }
     }
-
 }

@@ -8,7 +8,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class AddChoreActivity : AppCompatActivity() {
+class AddChore : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddChoreBinding
     private lateinit var childList: List<User>
@@ -31,18 +31,18 @@ class AddChoreActivity : AppCompatActivity() {
                 if (response.isSuccessful && response.body() != null) {
                     childList = response.body()!!.filter { it.role == "Child" }
                     val adapter = ArrayAdapter(
-                        this@AddChoreActivity,
+                        this@AddChore,
                         android.R.layout.simple_spinner_item,
                         childList.map { it.username }
                     )
                     binding.userSpinner.adapter = adapter
                 } else {
-                    Toast.makeText(this@AddChoreActivity, "Failed to fetch users", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddChore, "Failed to fetch users", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<List<User>>, t: Throwable) {
-                Toast.makeText(this@AddChoreActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@AddChore, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -70,15 +70,15 @@ class AddChoreActivity : AppCompatActivity() {
         RetrofitClient.instance.postChore(chore).enqueue(object : Callback<Chore> {
             override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(this@AddChoreActivity, "Chore added!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddChore, "Chore added!", Toast.LENGTH_SHORT).show()
                     finish() // optionally refresh instead
                 } else {
-                    Toast.makeText(this@AddChoreActivity, "Failed to add chore", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddChore, "Failed to add chore", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<Chore>, t: Throwable) {
-                Toast.makeText(this@AddChoreActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@AddChore, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }

@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sameteamappandroid.databinding.ActivityChildDashBoardBinding
+import org.threeten.bp.LocalDate
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.time.LocalDate
 
-class ChildDashboardActivity : AppCompatActivity() {
+class ChildDashboard : AppCompatActivity() {
 
     private lateinit var binding: ActivityChildDashBoardBinding
     private var currentUserId: Int = -1
@@ -28,7 +28,7 @@ class ChildDashboardActivity : AppCompatActivity() {
         if (currentUserId != -1) {
             fetchChores()
         } else {
-            Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.user_not_found), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -40,9 +40,8 @@ class ChildDashboardActivity : AppCompatActivity() {
                     updateUI()
                 }
             }
-
             override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
-                Toast.makeText(this@ChildDashboardActivity, "Failed to load chores", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ChildDashboard, getString(R.string.chore_fail), Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -57,13 +56,15 @@ class ChildDashboardActivity : AppCompatActivity() {
 
         val level = levelThresholds.indexOfFirst { totalPoints < it }.takeIf { it > 0 } ?: levelThresholds.size
         val levelNames = resources.getStringArray(R.array.levels_array).toList()
+
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, levelNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.levelSpinner.adapter = adapter
         binding.levelSpinner.setSelection(level - 1)
         binding.levelSpinner.isEnabled = false
 
-        binding.progressBar.progress = (totalPoints - levelThresholds[level - 1])
+        binding.progressBar.max = levelThresholds.getOrElse(level) { levelThresholds.last() }
+        binding.progressBar.progress = totalPoints
 
         val today = LocalDate.now()
         val upcoming = allChores.filter {
@@ -79,7 +80,7 @@ class ChildDashboardActivity : AppCompatActivity() {
             binding.upcomingChoresLayout.addView(noTasks)
         } else {
             for (chore in upcoming) {
-                val view = LinearLayout(this).apply {
+                val layout = LinearLayout(this).apply {
                     orientation = LinearLayout.VERTICAL
                     setPadding(0, 8, 0, 8)
                 }
@@ -93,9 +94,9 @@ class ChildDashboardActivity : AppCompatActivity() {
                     setOnClickListener { markChoreComplete(chore) }
                 }
 
-                view.addView(choreText)
-                view.addView(button)
-                binding.upcomingChoresLayout.addView(view)
+                layout.addView(choreText)
+                layout.addView(button)
+                binding.upcomingChoresLayout.addView(layout)
             }
         }
     }
@@ -106,9 +107,8 @@ class ChildDashboardActivity : AppCompatActivity() {
             override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
                 if (response.isSuccessful) fetchChores()
             }
-
             override fun onFailure(call: Call<Chore>, t: Throwable) {
-                Toast.makeText(this@ChildDashboardActivity, "Failed to complete chore", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@ChildDashboard, getString(R.string.chore_fail), Toast.LENGTH_SHORT).show()
             }
         })
     }

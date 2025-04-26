@@ -1,9 +1,7 @@
 package com.example.sameteamappandroid
 
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Headers
-import retrofit2.http.POST
+import retrofit2.http.*
 
 data class RegisterRequest(
     val username: String,
@@ -40,4 +38,45 @@ interface ApiService {
 
     @POST("Auth/login")
     fun login(@Body request: LoginRequest): Call<LoginResponse>
+
+    @GET("Users")
+    fun fetchUsers(): Call<List<User>>
+
+    @POST("Chores")
+    fun postChore(@Body chore: Chore): Call<Chore>
+
+    @GET("Chores")
+    fun fetchChores(): Call<List<Chore>>
+
+    @PUT("Chores/{id}")
+    fun completeChore(@Path("id") id: Int, @Body updatedChore: Chore): Call<Chore>
+
+    @GET("Rewards")
+    fun fetchRewards(): Call<List<Reward>>
+
+    @POST("Rewards")
+    fun postReward(@Body reward: Reward): Call<Reward>
+
+    @PUT("Rewards/{id}")
+    fun updateReward(@Path("id") id: Int, @Body reward: Reward): Call<Reward>
+
+    @DELETE("Rewards/{id}")
+    fun deleteReward(@Path("id") id: Int): Call<Void>
+
+    @POST("Chores")
+    fun rewardAsChore(@Body chore: Chore): Call<Chore>
+
+    @GET("RedeemedRewards/{userId}")
+    fun fetchRedeemedRewards(@Path("userId") userId: Int): Call<List<RedeemedReward>>
+
+    @POST("RedeemedRewards")
+    fun postRedeemedReward(@Body redeemedReward: RedeemedReward): Call<RedeemedReward>
+
+    @GET("Users/team/{teamId}")
+    fun fetchTeam(@Path("teamId") teamId: Int): Call<Team>
+
+    @POST("Users/addChild")
+    fun addChild(@Query("email") email: String, @Query("parentId") parentId: Int): Call<User>
+
+
 }

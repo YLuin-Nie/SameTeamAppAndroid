@@ -75,6 +75,11 @@
     <string name="not_enough_points">Not enough points.</string>
     <string name="redemption_success">You redeemed:</string>
     <string name="redemption_failed">Could not redeem reward.</string>
+    <string name="unspent_points_format">Unspent Points: %1$d</string>
+    <string name="reward_item_format">%1$s - %2$d Points</string>
+    <string name="redeemed_item_format">%1$s - %2$d Points&#10;Redeemed on: %3$s</string>
+    <string name="redemption_success_format">Redeemed %1$s!</string>
+    <string name="user_not_found">User not found</string>
 
     <!-- Dashboards -->
     <string name="child_dashboard_title">Child Dashboard</string>
@@ -86,10 +91,13 @@
     <string name="chores_for_date">Chores for</string>
     <string name="no_chores_for_date">No chores for this date.</string>
     <string name="team_label">Team:</string>
-    <string name="children_levels">Children's Levels</string>
+    <string name="children_levels">Child Levels</string>
     <string name="add_child">Add Child</string>
-    <string name="child_email_label">Child's Email:</string>
+    <string name="child_email_label">Child Email:</string>
     <string name="cancel_button">Cancel</string>
+    <string name="log_out">Log Out</string>
+
+
     <string-array name="levels_array">
         <item>Level 1</item>
         <item>Level 2</item>
@@ -97,6 +105,4 @@
         <item>Level 4</item>
         <item>Level 5</item>
     </string-array>
-
-
 </resources>

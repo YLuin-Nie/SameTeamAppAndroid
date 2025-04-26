@@ -15,39 +15,34 @@
         android:theme="@style/Theme.SameTeamAppAndroid"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <activity
-            android:name=".ParentDashboard"
-            android:exported="false" />
-        <activity
-            android:name=".ChildDashboard"
-            android:exported="false" />
-        <activity
-            android:name=".ChildRewards"
-            android:exported="false" />
-        <activity
-            android:name=".ParentRewards"
-            android:exported="false" />
-        <activity
-            android:name=".ChoresList"
-            android:exported="false" />
-        <activity
-            android:name=".AddChore"
-            android:exported="false" />
-        <activity
-            android:name=".SignUp"
-            android:exported="false" />
-        <activity
-            android:name=".SignIn"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+
+        <!-- Main Screen -->
+        <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Login Screen -->
+        <activity android:name=".SignIn" android:exported="false" />
+
+        <!-- Registration Screen -->
+        <activity android:name=".SignUp" android:exported="false" />
+
+        <!-- Dashboards -->
+        <activity android:name=".ParentDashboard" android:exported="false" />
+        <activity android:name=".ChildDashboard" android:exported="false" />
+
+        <activity
+            android:name=".ChildRewards" android:exported="false" />
+        <activity
+            android:name=".ParentRewards" android:exported="false" />
+        <activity
+            android:name=".ChoresList" android:exported="false" />
+        <activity
+            android:name=".AddChore" android:exported="false" />
+
     </application>
 
 </manifest>
