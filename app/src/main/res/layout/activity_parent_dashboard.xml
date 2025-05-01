@@ -100,14 +100,43 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Logout -->
-        <Button
-            android:id="@+id/buttonLogout"
-            android:text="@string/log_out"
+        <!-- Navigation Buttons -->
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_marginTop="24dp"
             android:layout_gravity="center_horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="4">
+
+            <Button
+                android:id="@+id/buttonGoDashboard"
+                android:layout_weight="1"
+                android:text="@string/nav_dashboard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/buttonGoAddChore"
+                android:layout_weight="1"
+                android:text="@string/nav_add_chore"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/buttonGoRewards"
+                android:layout_weight="1"
+                android:text="@string/nav_rewards"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/buttonLogout"
+                android:layout_weight="1"
+                android:text="@string/nav_log_out"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

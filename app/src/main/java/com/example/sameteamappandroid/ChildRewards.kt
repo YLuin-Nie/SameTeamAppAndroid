@@ -135,7 +135,7 @@ class ChildRewards : AppCompatActivity() {
         val redemption = RedeemedReward(
             redemptionId = 0,
             userId = userId,
-            rewardId = reward.id,
+            rewardId = reward.rewardId,
             rewardName = reward.name,
             pointsSpent = reward.cost,
             dateRedeemed = LocalDate.now().toString()

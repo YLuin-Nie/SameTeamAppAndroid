@@ -12,78 +12,76 @@
 
         <!-- Title -->
         <TextView
-            android:text="@string/parent_rewards_title"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="@string/parent_rewards_title"
+            android:textSize="34sp"
+            android:textStyle="bold" />
+
+        <!-- Navigation Buttons -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="4">
+
+            <Button
+                android:id="@+id/buttonGoDashboard"
+                android:layout_weight="1"
+                android:text="@string/nav_dashboard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/buttonGoAddChore"
+                android:layout_weight="1"
+                android:text="@string/nav_add_chore"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/buttonGoRewards"
+                android:layout_weight="1"
+                android:text="@string/nav_rewards"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/buttonLogout"
+                android:layout_weight="1"
+                android:text="@string/nav_log_out"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Buttons to Open Popups -->
+        <Button
+            android:id="@+id/buttonOpenRewardPopup"
+            android:text="@string/reward_child_title"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Reward a Child -->
-        <TextView android:text="@string/reward_child_title" />
-
-        <Spinner
-            android:id="@+id/childSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="48dp" />
-
-        <EditText
-            android:id="@+id/rewardNameEditText"
-            android:layout_width="match_parent"
-            android:layout_height="58dp"
-            android:hint="@string/reward_name_label" />
-
-        <EditText
-            android:id="@+id/rewardPointsEditText"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:hint="@string/points_label"
-            android:inputType="number" />
-
         <Button
-            android:id="@+id/rewardButton"
-            android:text="@string/reward_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#888"
-            android:layout_marginVertical="16dp" />
-
-        <!-- Define New Rewards -->
-        <TextView android:text="@string/define_new_rewards" />
-
-        <EditText
-            android:id="@+id/newRewardNameEditText"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:hint="Reward Name" />
-
-        <EditText
-            android:id="@+id/newRewardPointsEditText"
-            android:layout_width="match_parent"
-            android:layout_height="61dp"
-            android:hint="Cost"
-            android:inputType="number" />
-
-        <Button
-            android:id="@+id/addRewardButton"
+            android:id="@+id/buttonOpenAddRewardPopup"
             android:text="@string/add_reward_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <!-- Manage Rewards -->
         <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
             android:text="@string/manage_rewards"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp" />
+            android:textSize="34sp"
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/rewardListLayout"
             android:layout_width="match_parent"
-            android:layout_height="35dp"
+            android:layout_height="wrap_content"
             android:orientation="vertical" />
 
     </LinearLayout>

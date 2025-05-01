@@ -1,5 +1,6 @@
 package com.example.sameteamappandroid
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +20,30 @@ class AddChore : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAddChoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // ✅ Navigation button handlers
+        binding.buttonGoDashboard.setOnClickListener {
+            startActivity(Intent(this, ParentDashboard::class.java))
+            finish()
+        }
+
+        binding.buttonGoAddChore.setOnClickListener {
+            startActivity(Intent(this, AddChore::class.java))
+            finish()
+        }
+
+        binding.buttonGoRewards.setOnClickListener {
+            startActivity(Intent(this, ParentRewards::class.java))
+            finish()
+        }
+
+        binding.buttonLogout.setOnClickListener {
+            val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE).edit()
+            prefs.clear()
+            prefs.apply()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
 
         fetchUsers()
 
@@ -185,11 +210,13 @@ class AddChore : AppCompatActivity() {
 
         val selectedUser = childList[selectedIndex]
         val chore = Chore(
+            choreId = 0,
             choreText = choreText,
             points = points,
             assignedTo = selectedUser.userId,
             dateAssigned = date,
             completed = false
+
         )
 
         RetrofitClient.instance.postChore(chore).enqueue(object : Callback<Chore> {

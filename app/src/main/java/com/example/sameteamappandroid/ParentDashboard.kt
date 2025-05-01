@@ -58,6 +58,19 @@ class ParentDashboard : AppCompatActivity() {
             displayUpcomingChores()
         }
 
+        binding.buttonGoDashboard.setOnClickListener {
+            startActivity(Intent(this, ParentDashboard::class.java))
+            finish()
+        }
+
+        binding.buttonGoAddChore.setOnClickListener {
+            startActivity(Intent(this, AddChore::class.java))
+        }
+
+        binding.buttonGoRewards.setOnClickListener {
+            startActivity(Intent(this, ParentRewards::class.java))
+        }
+
         binding.buttonLogout.setOnClickListener {
             val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE).edit()
             prefs.clear()

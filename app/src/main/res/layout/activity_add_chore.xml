@@ -5,9 +5,55 @@
     android:padding="16dp">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
+
+        <!-- Title -->
+        <TextView
+            android:text="@string/add_chore_title"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Navigation Buttons -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="4">
+
+            <Button
+                android:id="@+id/buttonGoDashboard"
+                android:layout_weight="1"
+                android:text="@string/nav_dashboard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/buttonGoAddChore"
+                android:layout_weight="1"
+                android:text="@string/nav_add_chore"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/buttonGoRewards"
+                android:layout_weight="1"
+                android:text="@string/nav_rewards"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/buttonLogout"
+                android:layout_weight="1"
+                android:text="@string/nav_log_out"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
 
         <!-- Chore Form -->
         <EditText
@@ -40,7 +86,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Placeholder for chore lists -->
+        <!-- Pending Chores -->
         <TextView
             android:text="@string/pending_chores"
             android:textStyle="bold"
@@ -54,6 +100,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- Completed Chores -->
         <TextView
             android:text="@string/completed_chores"
             android:textStyle="bold"

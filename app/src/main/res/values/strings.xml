@@ -7,7 +7,10 @@
     <string name="edit">✏️</string>
     <string name="delete">🗑️</string>
     <string name="submit_button">Submit</string>
-    <string name="log_out">Log Out</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_add_chore">Add Chore</string>
+    <string name="nav_rewards">Rewards</string>
+    <string name="nav_log_out">Log Out</string>
     <string name="hide_button">🙈 Hide</string>
     <string name="yes">Yes</string>
 
@@ -38,6 +41,7 @@
     <string name="signup_error_default">Something went wrong.</string>
 
     <!-- 🧹 AddChore -->
+    <string name="add_chore_title">Chore Management</string>
     <string name="add_chore">Add Chore</string>
     <string name="chore_hint">Chore Description</string>
     <string name="points_hint">Points</string>
@@ -105,6 +109,11 @@
     <string name="add_reward_button">Add Reward</string>
     <string name="manage_rewards">Manage Rewards</string>
     <string name="no_rewards">No rewards defined yet.</string>
+    <string name="popup_reward_button">Reward</string>
+    <string name="popup_add_button">Add</string>
+    <string name="edit_reward_title">Edit Reward</string>
+
+
 
     <!-- 🧒 Child Rewards -->
     <string name="child_rewards_title">Available Rewards</string>

@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:background="@android:color/white"
+    android:elevation="8dp">
+
+    <EditText
+        android:id="@+id/popupNewRewardName"
+        android:layout_width="380dp"
+        android:layout_height="65dp"
+        android:hint="@string/reward_name_label" />
+
+    <EditText
+        android:id="@+id/popupNewRewardCost"
+        android:layout_width="381dp"
+        android:layout_height="68dp"
+        android:hint="@string/points_label"
+        android:inputType="number" />
+
+    <Button
+        android:id="@+id/buttonSubmitNewReward"
+        android:text="@string/popup_add_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

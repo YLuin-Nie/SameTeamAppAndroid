@@ -1,0 +1,33 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:background="@android:color/white"
+    android:elevation="8dp">
+
+    <Spinner
+        android:id="@+id/popupChildSpinner"
+        android:layout_width="378dp"
+        android:layout_height="70dp" />
+
+
+    <EditText
+        android:id="@+id/popupRewardName"
+        android:layout_width="378dp"
+        android:layout_height="63dp"
+        android:hint="@string/reward_name_label" />
+
+    <EditText
+        android:id="@+id/popupRewardPoints"
+        android:layout_width="381dp"
+        android:layout_height="68dp"
+        android:hint="@string/points_label"
+        android:inputType="number" />
+
+    <Button
+        android:id="@+id/buttonSubmitReward"
+        android:text="@string/popup_reward_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

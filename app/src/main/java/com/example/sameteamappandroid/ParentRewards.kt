@@ -1,6 +1,9 @@
 package com.example.sameteamappandroid
 
+import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sameteamappandroid.databinding.ActivityParentRewardsBinding
@@ -22,8 +25,124 @@ class ParentRewards : AppCompatActivity() {
 
         fetchUsersAndRewards()
 
-        binding.rewardButton.setOnClickListener { rewardChild() }
-        binding.addRewardButton.setOnClickListener { addNewReward() }
+        // Popup buttons
+        binding.buttonOpenRewardPopup.setOnClickListener {
+            showPopup(R.layout.popup_reward_child)
+        }
+
+        binding.buttonOpenAddRewardPopup.setOnClickListener {
+            showPopup(R.layout.popup_add_reward)
+        }
+
+        // Navigation
+        binding.buttonGoDashboard.setOnClickListener {
+            startActivity(Intent(this, ParentDashboard::class.java))
+            finish()
+        }
+
+        binding.buttonGoAddChore.setOnClickListener {
+            startActivity(Intent(this, AddChore::class.java))
+        }
+
+        binding.buttonGoRewards.setOnClickListener {
+            startActivity(Intent(this, ParentRewards::class.java))
+            finish()
+        }
+
+        binding.buttonLogout.setOnClickListener {
+            val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE).edit()
+            prefs.clear()
+            prefs.apply()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+    }
+
+    private fun showPopup(layoutId: Int) {
+        val dialog = Dialog(this)
+        val view = layoutInflater.inflate(layoutId, null)
+        dialog.setContentView(view)
+        dialog.window?.setLayout(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
+
+        when (layoutId) {
+            R.layout.popup_reward_child -> {
+                val spinner = view.findViewById<Spinner>(R.id.popupChildSpinner)
+                val nameField = view.findViewById<EditText>(R.id.popupRewardName)
+                val pointsField = view.findViewById<EditText>(R.id.popupRewardPoints)
+                val button = view.findViewById<Button>(R.id.buttonSubmitReward)
+
+                val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, children.map { it.username })
+                spinner.adapter = adapter
+
+                button.setOnClickListener {
+                    val index = spinner.selectedItemPosition
+                    val name = nameField.text.toString().trim()
+                    val points = pointsField.text.toString().toIntOrNull() ?: 0
+
+                    if (index < 0 || name.isEmpty() || points <= 0) {
+                        showToast("Please fill in all fields.")
+                        return@setOnClickListener
+                    }
+
+                    val chore = Chore(
+                        choreId = 0,
+                        choreText = name,
+                        points = points,
+                        assignedTo = children[index].userId,
+                        dateAssigned = LocalDate.now().toString(),
+                        completed = false
+                    )
+
+                    RetrofitClient.instance.rewardAsChore(chore).enqueue(object : Callback<Chore> {
+                        override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
+                            showToast("Rewarded!")
+                            dialog.dismiss()
+                        }
+
+                        override fun onFailure(call: Call<Chore>, t: Throwable) {
+                            showToast("Error: ${t.message}")
+                        }
+                    })
+                }
+            }
+
+            R.layout.popup_add_reward -> {
+                val nameField = view.findViewById<EditText>(R.id.popupNewRewardName)
+                val costField = view.findViewById<EditText>(R.id.popupNewRewardCost)
+                val button = view.findViewById<Button>(R.id.buttonSubmitNewReward)
+
+                button.setOnClickListener {
+                    val name = nameField.text.toString().trim()
+                    val cost = costField.text.toString().toIntOrNull() ?: 0
+
+                    if (name.isEmpty() || cost <= 0) {
+                        showToast("Please enter valid name and cost.")
+                        return@setOnClickListener
+                    }
+
+                    val reward = Reward(0, name, cost)
+                    RetrofitClient.instance.postReward(reward).enqueue(object : Callback<Reward> {
+                        override fun onResponse(call: Call<Reward>, response: Response<Reward>) {
+                            if (response.isSuccessful) {
+                                rewards.add(response.body()!!)
+                                displayRewards()
+                                showToast("Reward added.")
+                                dialog.dismiss()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Reward>, t: Throwable) {
+                            showToast("Error: ${t.message}")
+                        }
+                    })
+                }
+            }
+        }
     }
 
     private fun fetchUsersAndRewards() {
@@ -31,10 +150,9 @@ class ParentRewards : AppCompatActivity() {
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
                 if (response.isSuccessful) {
                     children = response.body()?.filter { it.role == "Child" } ?: emptyList()
-                    val adapter = ArrayAdapter(this@ParentRewards, android.R.layout.simple_spinner_item, children.map { it.username })
-                    binding.childSpinner.adapter = adapter
                 }
             }
+
             override fun onFailure(call: Call<List<User>>, t: Throwable) {}
         })
 
@@ -45,56 +163,8 @@ class ParentRewards : AppCompatActivity() {
                     displayRewards()
                 }
             }
+
             override fun onFailure(call: Call<List<Reward>>, t: Throwable) {}
-        })
-    }
-
-    private fun rewardChild() {
-        val selectedIndex = binding.childSpinner.selectedItemPosition
-        val name = binding.rewardNameEditText.text.toString().trim()
-        val points = binding.rewardPointsEditText.text.toString().toIntOrNull() ?: return
-
-        if (selectedIndex < 0 || name.isEmpty() || points <= 0) {
-            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val chore = Chore(
-            choreText = name,
-            points = points,
-            assignedTo = children[selectedIndex].userId,
-            dateAssigned = LocalDate.now().toString(),
-            completed = true
-        )
-
-        RetrofitClient.instance.rewardAsChore(chore).enqueue(object : Callback<Chore> {
-            override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
-                Toast.makeText(this@ParentRewards, "Rewarded!", Toast.LENGTH_SHORT).show()
-            }
-            override fun onFailure(call: Call<Chore>, t: Throwable) {
-                Toast.makeText(this@ParentRewards, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun addNewReward() {
-        val name = binding.newRewardNameEditText.text.toString().trim()
-        val cost = binding.newRewardPointsEditText.text.toString().toIntOrNull() ?: return
-
-        if (name.isEmpty() || cost <= 0) {
-            Toast.makeText(this, "Please enter valid name and cost", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val reward = Reward(0, name, cost)
-        RetrofitClient.instance.postReward(reward).enqueue(object : Callback<Reward> {
-            override fun onResponse(call: Call<Reward>, response: Response<Reward>) {
-                response.body()?.let {
-                    rewards.add(it)
-                    displayRewards()
-                }
-            }
-            override fun onFailure(call: Call<Reward>, t: Throwable) {}
         })
     }
 
@@ -125,18 +195,19 @@ class ParentRewards : AppCompatActivity() {
                         val updatedName = parts.getOrNull(0)?.trim() ?: reward.name
                         val updatedCost = parts.getOrNull(1)?.trim()?.split(" ")?.getOrNull(0)?.toIntOrNull() ?: reward.cost
 
-                        val updatedReward = Reward(reward.id, updatedName, updatedCost)
-                        RetrofitClient.instance.updateReward(reward.id, updatedReward).enqueue(object : Callback<Reward> {
+                        val updatedReward = Reward(reward.rewardId, updatedName, updatedCost)
+                        RetrofitClient.instance.updateReward(reward.rewardId, updatedReward).enqueue(object : Callback<Reward> {
                             override fun onResponse(call: Call<Reward>, response: Response<Reward>) {
                                 if (response.isSuccessful) {
-                                    val index = rewards.indexOfFirst { it.id == reward.id }
+                                    val index = rewards.indexOfFirst { it.rewardId == reward.rewardId }
                                     rewards[index] = response.body()!!
                                     displayRewards()
-                                    Toast.makeText(this@ParentRewards, "Reward updated", Toast.LENGTH_SHORT).show()
+                                    showToast("Reward updated")
                                 }
                             }
+
                             override fun onFailure(call: Call<Reward>, t: Throwable) {
-                                Toast.makeText(this@ParentRewards, "Update failed", Toast.LENGTH_SHORT).show()
+                                showToast("Update failed")
                             }
                         })
                     }
@@ -146,14 +217,15 @@ class ParentRewards : AppCompatActivity() {
             val deleteButton = Button(this).apply {
                 text = getString(R.string.delete)
                 setOnClickListener {
-                    RetrofitClient.instance.deleteReward(reward.id).enqueue(object : Callback<Void> {
+                    RetrofitClient.instance.deleteReward(reward.rewardId).enqueue(object : Callback<Void> {
                         override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                            rewards.removeAll { it.id == reward.id }
+                            rewards.removeAll { it.rewardId == reward.rewardId }
                             displayRewards()
-                            Toast.makeText(this@ParentRewards, "Reward deleted", Toast.LENGTH_SHORT).show()
+                            showToast("Reward deleted")
                         }
+
                         override fun onFailure(call: Call<Void>, t: Throwable) {
-                            Toast.makeText(this@ParentRewards, "Delete failed", Toast.LENGTH_SHORT).show()
+                            showToast("Delete failed")
                         }
                     })
                 }
@@ -162,8 +234,11 @@ class ParentRewards : AppCompatActivity() {
             container.addView(rewardText)
             container.addView(editButton)
             container.addView(deleteButton)
-
             binding.rewardListLayout.addView(container)
         }
+    }
+
+    private fun showToast(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 }
