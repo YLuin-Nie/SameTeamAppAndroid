@@ -3,7 +3,6 @@ package com.example.sameteamappandroid
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sameteamappandroid.databinding.ActivitySignUpBinding
@@ -39,14 +38,12 @@ class SignUp : AppCompatActivity() {
             role = "Parent"
             binding.roleParentButton.isSelected = true
             binding.roleChildButton.isSelected = false
-            binding.parentFields.visibility = View.VISIBLE
         }
 
         binding.roleChildButton.setOnClickListener {
             role = "Child"
             binding.roleParentButton.isSelected = false
             binding.roleChildButton.isSelected = true
-            binding.parentFields.visibility = View.GONE
         }
 
         // 🚀 Sign up logic
@@ -54,17 +51,10 @@ class SignUp : AppCompatActivity() {
             val username = binding.usernameEditText.text.toString().trim()
             val email = binding.emailEditText.text.toString().trim()
             val password = binding.passwordEditText.text.toString()
-            val team = binding.teamEditText.text.toString().trim()
-            val teamPassword = binding.teamPasswordEditText.text.toString()
 
             // 🔐 Input validation
             if (username.isEmpty() || email.isEmpty() || password.length < 6 || role.isEmpty()) {
                 Toast.makeText(this, "Please complete all required fields.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            if (role == "Parent" && (team.isEmpty() || teamPassword.isEmpty())) {
-                Toast.makeText(this, "Team and password are required for parents.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -78,8 +68,8 @@ class SignUp : AppCompatActivity() {
                 email = email,
                 password = password,
                 role = role,
-                team = if (role == "Parent") team else null,
-                teamPassword = if (role == "Parent") teamPassword else null
+                team = null,
+                teamPassword = null
             )
 
             Log.d("SIGNUP_REQUEST", "Sending: $request")

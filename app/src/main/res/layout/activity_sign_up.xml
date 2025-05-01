@@ -66,38 +66,13 @@
             app:layout_constraintTop_toBottomOf="@id/eyeIcon"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <LinearLayout
-            android:id="@+id/parentFields"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/roleChildButton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <EditText
-                android:id="@+id/teamEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/team_name" />
-
-            <EditText
-                android:id="@+id/teamPasswordEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/team_password"
-                android:inputType="textPassword" />
-        </LinearLayout>
-
         <Button
             android:id="@+id/signUpButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/sign_up"
             android:layout_marginTop="24dp"
-            app:layout_constraintTop_toBottomOf="@id/parentFields"
+            app:layout_constraintTop_toBottomOf="@id/roleChildButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
