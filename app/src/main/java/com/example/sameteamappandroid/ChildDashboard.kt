@@ -33,13 +33,7 @@ class ChildDashboard : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.user_not_found), Toast.LENGTH_SHORT).show()
         }
 
-        binding.signOutButton.setOnClickListener {
-            val sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE)
-            sharedPref.edit().clear().apply()
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
-
+        // 🗓️ Date picker + Clear
         binding.datePickerButton.setOnClickListener {
             val today = LocalDate.now()
             val datePicker = DatePickerDialog(this, { _, year, month, day ->
@@ -53,6 +47,27 @@ class ChildDashboard : AppCompatActivity() {
             selectedDate = null
             displayUpcomingChores()
         }
+
+        // 🔘 Navigation Buttons
+        binding.buttonGoDashboard.setOnClickListener {
+            startActivity(Intent(this, ChildDashboard::class.java))
+            finish()
+        }
+
+        binding.buttonGoChores.setOnClickListener {
+            startActivity(Intent(this, ChoresList::class.java))
+        }
+
+        binding.buttonGoRewards.setOnClickListener {
+            startActivity(Intent(this, ChildRewards::class.java))
+        }
+
+        binding.buttonGoLogout.setOnClickListener {
+            val sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+            sharedPref.edit().clear().apply()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
     }
 
     private fun fetchChores() {
@@ -63,6 +78,7 @@ class ChildDashboard : AppCompatActivity() {
                     fetchCompleted()
                 }
             }
+
             override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
                 Toast.makeText(this@ChildDashboard, getString(R.string.chore_fail), Toast.LENGTH_SHORT).show()
             }
@@ -77,6 +93,7 @@ class ChildDashboard : AppCompatActivity() {
                     updateDashboard()
                 }
             }
+
             override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
                 Toast.makeText(this@ChildDashboard, getString(R.string.chore_fail), Toast.LENGTH_SHORT).show()
             }
@@ -176,6 +193,7 @@ class ChildDashboard : AppCompatActivity() {
             override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
                 if (response.isSuccessful) fetchChores()
             }
+
             override fun onFailure(call: Call<Chore>, t: Throwable) {
                 Toast.makeText(this@ChildDashboard, getString(R.string.chore_fail), Toast.LENGTH_SHORT).show()
             }

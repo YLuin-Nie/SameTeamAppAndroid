@@ -19,6 +19,44 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+        <!-- 🔘 Navigation Buttons -->
+        <LinearLayout
+            android:id="@+id/nav_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <Button
+                android:id="@+id/buttonGoDashboard"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/nav_dashboard" />
+
+            <Button
+                android:id="@+id/buttonGoChores"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/nav_chore_list" />
+
+            <Button
+                android:id="@+id/buttonGoRewards"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/nav_rewards" />
+
+            <Button
+                android:id="@+id/buttonGoLogout"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/nav_log_out" />
+        </LinearLayout>
+
         <!-- Unspent Points Display -->
         <TextView
             android:id="@+id/pointsTextView"

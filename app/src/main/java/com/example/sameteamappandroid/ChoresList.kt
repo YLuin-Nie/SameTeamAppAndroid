@@ -1,5 +1,6 @@
 package com.example.sameteamappandroid
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -8,7 +9,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import org.threeten.bp.LocalDate
-
 
 class ChoresList : AppCompatActivity() {
 
@@ -28,6 +28,26 @@ class ChoresList : AppCompatActivity() {
             fetchChores()
         } else {
             Toast.makeText(this, "User not found", Toast.LENGTH_SHORT).show()
+        }
+
+        // 🔘 Navigation Buttons
+        binding.buttonGoDashboard.setOnClickListener {
+            startActivity(Intent(this, ChildDashboard::class.java))
+            finish()
+        }
+
+        binding.buttonGoChores.setOnClickListener {
+            startActivity(Intent(this, ChoresList::class.java))
+        }
+
+        binding.buttonGoRewards.setOnClickListener {
+            startActivity(Intent(this, ChildRewards::class.java))
+        }
+
+        binding.buttonGoLogout.setOnClickListener {
+            prefs.edit().clear().apply()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 

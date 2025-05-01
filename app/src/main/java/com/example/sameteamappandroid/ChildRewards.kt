@@ -1,5 +1,6 @@
 package com.example.sameteamappandroid
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -29,6 +30,26 @@ class ChildRewards : AppCompatActivity() {
             loadRewards()
         } else {
             Toast.makeText(this, getString(R.string.user_not_found), Toast.LENGTH_SHORT).show()
+        }
+
+        // 🔘 Navigation Buttons
+        binding.buttonGoDashboard.setOnClickListener {
+            startActivity(Intent(this, ChildDashboard::class.java))
+            finish()
+        }
+
+        binding.buttonGoChores.setOnClickListener {
+            startActivity(Intent(this, ChoresList::class.java))
+        }
+
+        binding.buttonGoRewards.setOnClickListener {
+            startActivity(Intent(this, ChildRewards::class.java))
+        }
+
+        binding.buttonGoLogout.setOnClickListener {
+            prefs.edit().clear().apply()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 
@@ -119,7 +140,12 @@ class ChildRewards : AppCompatActivity() {
         } else {
             for (reward in redeemedRewards) {
                 val rewardView = TextView(this).apply {
-                    text = getString(R.string.redeemed_item_format, reward.rewardName, reward.pointsSpent, reward.dateRedeemed)
+                    text = getString(
+                        R.string.redeemed_item_format,
+                        reward.rewardName,
+                        reward.pointsSpent,
+                        reward.dateRedeemed
+                    )
                 }
                 binding.redeemedHistoryLayout.addView(rewardView)
             }
@@ -144,7 +170,11 @@ class ChildRewards : AppCompatActivity() {
         RetrofitClient.instance.postRedeemedReward(redemption).enqueue(object : Callback<RedeemedReward> {
             override fun onResponse(call: Call<RedeemedReward>, response: Response<RedeemedReward>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(this@ChildRewards, getString(R.string.redemption_success_format, reward.name), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@ChildRewards,
+                        getString(R.string.redemption_success_format, reward.name),
+                        Toast.LENGTH_SHORT
+                    ).show()
                     loadRedeemed()
                 } else {
                     Toast.makeText(this@ChildRewards, getString(R.string.redemption_failed), Toast.LENGTH_SHORT).show()

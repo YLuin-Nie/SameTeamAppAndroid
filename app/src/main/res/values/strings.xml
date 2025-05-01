@@ -9,6 +9,7 @@
     <string name="submit_button">Submit</string>
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_add_chore">Add Chore</string>
+    <string name="nav_chore_list">Chores</string>
     <string name="nav_rewards">Rewards</string>
     <string name="nav_log_out">Log Out</string>
     <string name="hide_button">🙈 Hide</string>
