@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Title -->
         <TextView
             android:text="@string/child_rewards_title"
             android:textSize="22sp"
@@ -18,30 +19,39 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+        <!-- Unspent Points Display -->
         <TextView
             android:id="@+id/pointsTextView"
             android:text="@string/unspent_points"
+            android:textSize="18sp"
+            android:layout_marginBottom="12dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+        <!-- Rewards List -->
         <LinearLayout
             android:id="@+id/availableRewardsLayout"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- Divider -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginVertical="16dp"
             android:background="#888" />
 
+        <!-- Redeemed History Title -->
         <TextView
             android:text="@string/redeemed_history_title"
             android:textStyle="bold"
+            android:textSize="18sp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp" />
 
+        <!-- Redeemed Rewards List -->
         <LinearLayout
             android:id="@+id/redeemedHistoryLayout"
             android:orientation="vertical"

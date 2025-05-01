@@ -28,7 +28,7 @@
             android:id="@+id/unspentPointsText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/unspent_points" />
+            android:text="@string/unspent_points_label" />
 
         <Spinner
             android:id="@+id/levelSpinner"
@@ -43,6 +43,27 @@
             android:layout_height="wrap_content"
             android:max="200" />
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/datePickerButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/select_date" />
+
+            <Button
+                android:id="@+id/clearDateButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/clear_date" />
+        </LinearLayout>
+
         <TextView
             android:text="@string/upcoming_chores"
             android:textStyle="bold"
@@ -56,5 +77,13 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/signOutButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/log_out" />
+
     </LinearLayout>
 </ScrollView>

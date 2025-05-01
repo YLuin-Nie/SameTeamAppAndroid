@@ -50,9 +50,7 @@ class ChildRewards : AppCompatActivity() {
             override fun onResponse(call: Call<List<RedeemedReward>>, response: Response<List<RedeemedReward>>) {
                 if (response.isSuccessful) {
                     redeemedRewards = response.body() ?: listOf()
-                    calculatePoints()
-                    displayRewards()
-                    displayRedeemed()
+                    loadCompletedChores()
                 }
             }
 
@@ -60,11 +58,22 @@ class ChildRewards : AppCompatActivity() {
         })
     }
 
-    private fun calculatePoints() {
-        val totalEarned = 100  // Replace with real total
-        val spent = redeemedRewards.sumOf { it.pointsSpent }
-        points = totalEarned - spent
-        binding.pointsTextView.text = getString(R.string.unspent_points_format, points)
+    private fun loadCompletedChores() {
+        RetrofitClient.instance.fetchCompletedChores().enqueue(object : Callback<List<Chore>> {
+            override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
+                if (response.isSuccessful) {
+                    val userCompleted = response.body()?.filter { it.assignedTo == userId } ?: listOf()
+                    val earned = userCompleted.sumOf { it.points }
+                    val spent = redeemedRewards.sumOf { it.pointsSpent }
+                    points = earned - spent
+                    binding.pointsTextView.text = getString(R.string.unspent_points_format, points)
+                    displayRewards()
+                    displayRedeemed()
+                }
+            }
+
+            override fun onFailure(call: Call<List<Chore>>, t: Throwable) {}
+        })
     }
 
     private fun displayRewards() {

@@ -1,23 +1,32 @@
 <resources>
-    <!-- Main -->
+
+    <!-- 🌐 Global -->
     <string name="app_name">SameTeamAppAndroid</string>
+    <string name="save">💾</string>
+    <string name="cancel">❌</string>
+    <string name="edit">✏️</string>
+    <string name="delete">🗑️</string>
+    <string name="submit_button">Submit</string>
+    <string name="log_out">Log Out</string>
+    <string name="hide_button">🙈 Hide</string>
+    <string name="yes">Yes</string>
+
+    <!-- 🔐 Authentication -->
     <string name="sign_in">Sign In</string>
     <string name="sign_up">Sign Up</string>
-    <string name="toggle_dark_mode">Toggle Dark Mode</string>
-    <string name="logo_description">App Logo</string>
-
-    <!-- Sign In -->
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="error_empty_fields">Please fill in all fields</string>
-    <string name="logging_in">Logging in...</string>
     <string name="dont_have_account">Dont have an account?</string>
+    <string name="toggle_dark_mode">Toggle Dark Mode</string>
+    <string name="logo_description">App Logo</string>
     <string name="show_password">Show Password</string>
     <string name="hide_password">Hide Password</string>
+    <string name="invalid_user">Invalid user ID. Please log in again.</string>
 
-    <!-- Sign Up -->
+    <!-- 👤 Sign Up -->
     <string name="username">Username</string>
     <string name="select_role">Select Role:</string>
     <string name="parent">Parent</string>
@@ -28,7 +37,7 @@
     <string name="sign_up_success">Sign-up successful! Please sign in to continue.</string>
     <string name="signup_error_default">Something went wrong.</string>
 
-    <!-- AddChore.kt -->
+    <!-- 🧹 AddChore -->
     <string name="add_chore">Add Chore</string>
     <string name="chore_hint">Chore Description</string>
     <string name="points_hint">Points</string>
@@ -37,18 +46,55 @@
     <string name="pending_chores">Pending Chores</string>
     <string name="completed_chores">Completed Chores (Last 7 Days)</string>
     <string name="chore_success">Chore added!</string>
-    <string name="chore_fail">Failed to add chore</string>
+    <string name="chore_fail">Failed to load chores.</string>
 
-    <!-- ChoresList.kt -->
+    <!-- 📅 ChoresList -->
     <string name="your_chores">Your Chores</string>
     <string name="your_points">Your Points:</string>
     <string name="task_progress">Task Completion Progress:</string>
     <string name="no_pending">No pending chores assigned.</string>
     <string name="no_completed">No completed chores in the last 7 days.</string>
     <string name="complete_button">✔️ Complete</string>
-    <string name="undo_button">🔄 Undo</string>
+    <string name="undo_button">↩️ Undo</string>
 
-    <!-- ParentRewards -->
+    <!-- 👨‍👩‍👧‍👦 Parent Dashboard -->
+    <string name="parent_dashboard_title">Parent Dashboard</string>
+    <string name="team_label">Team:</string>
+    <string name="children_levels">Child Levels</string>
+    <string name="remove_child_title">Remove Child</string>
+    <string name="remove_child_confirm">Are you sure you want to remove %1$s?</string>
+    <string name="remove_button">❌</string>
+    <string name="child_removed_success">%1$s has been removed from the team.</string>
+    <string name="remove_fail">Failed to remove user: %1$s</string>
+    <string name="add_child">Add Child</string>
+    <string name="child_email_label">Child Email:</string>
+    <string name="select_date">Select a Date</string>
+    <string name="clear_date">Clear Date Filter</string>
+
+    <!-- 📊 Levels -->
+    <string name="level_newbie">Newbie</string>
+    <string name="level_beginner">Beginner</string>
+    <string name="level_rising_star">Rising Star</string>
+    <string name="level_helper_pro">Helper Pro</string>
+    <string name="level_superstar">Superstar</string>
+    <string name="level_legend">Legend</string>
+    <string name="level_display_format">%1$s - Level %2$d (%3$s) - %4$d pts</string>
+
+    <!-- 📅 Chores Display -->
+    <string name="upcoming_chores">Upcoming Chores (Next 7 Days)</string>
+    <string name="no_upcoming_chores">No upcoming chores.</string>
+    <string name="chores_for_date">Chores for</string>
+    <string name="no_chores_for_date">No chores for this date.</string>
+
+    <!-- 🛠️ Team Management -->
+    <string name="create_team">Create Team</string>
+    <string name="join_team">Join Team</string>
+    <string name="add_to_team">Add to Team</string>
+    <string name="create_team_title">Create Team</string>
+    <string name="join_team_title">Join Team</string>
+    <string name="add_user_to_team_title">Add User to Team</string>
+
+    <!-- 💰 Parent Rewards -->
     <string name="parent_rewards_title">Parent Rewards Management</string>
     <string name="reward_child_title">Reward A Child (Extra Points)</string>
     <string name="select_child">Select a child...</string>
@@ -59,12 +105,8 @@
     <string name="add_reward_button">Add Reward</string>
     <string name="manage_rewards">Manage Rewards</string>
     <string name="no_rewards">No rewards defined yet.</string>
-    <string name="save">💾</string>
-    <string name="cancel">❌</string>
-    <string name="edit">✏️</string>
-    <string name="delete">🗑️</string>
 
-    <!-- ChildRewards -->
+    <!-- 🧒 Child Rewards -->
     <string name="child_rewards_title">Available Rewards</string>
     <string name="unspent_points">Unspent Points:</string>
     <string name="no_rewards_available">No rewards available.</string>
@@ -81,23 +123,10 @@
     <string name="redemption_success_format">Redeemed %1$s!</string>
     <string name="user_not_found">User not found</string>
 
-    <!-- Dashboards -->
+    <!-- 👶 Child Dashboard -->
     <string name="child_dashboard_title">Child Dashboard</string>
-    <string name="parent_dashboard_title">Parent Dashboard</string>
-    <string name="total_points">Total Points Earned:</string>
+    <string name="total_points">Total Points:</string>
     <string name="unspent_points_label">Unspent Points:</string>
-    <string name="upcoming_chores">Upcoming Chores (Next 7 Days)</string>
-    <string name="no_upcoming_chores">No upcoming chores.</string>
-    <string name="chores_for_date">Chores for</string>
-    <string name="no_chores_for_date">No chores for this date.</string>
-    <string name="team_label">Team:</string>
-    <string name="children_levels">Child Levels</string>
-    <string name="add_child">Add Child</string>
-    <string name="child_email_label">Child Email:</string>
-    <string name="cancel_button">Cancel</string>
-    <string name="log_out">Log Out</string>
-
-
     <string-array name="levels_array">
         <item>Level 1</item>
         <item>Level 2</item>
@@ -105,4 +134,5 @@
         <item>Level 4</item>
         <item>Level 5</item>
     </string-array>
+
 </resources>

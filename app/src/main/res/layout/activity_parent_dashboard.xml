@@ -10,67 +10,82 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- Title -->
         <TextView
             android:text="@string/parent_dashboard_title"
             android:textStyle="bold"
             android:textSize="24sp"
-            android:layout_marginBottom="12dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp" />
 
+        <!-- Team Name -->
         <TextView
-            android:id="@+id/teamNameTextView"
+            android:id="@+id/textTeamName"
             android:text="@string/team_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:text="@string/children_levels"
-            android:textStyle="bold"
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_marginTop="12dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <LinearLayout
-            android:id="@+id/childrenListLayout"
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/showAddChildButton"
-            android:text="@string/add_child"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            android:weightSum="3">
 
-        <LinearLayout
-            android:id="@+id/addChildLayout"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/childEmailEditText"
-                android:hint="@string/child_email_label"
-                android:inputType="textEmailAddress"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/buttonCreateTeam"
+                android:layout_weight="1"
+                android:text="@string/create_team"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content" />
 
             <Button
-                android:id="@+id/submitAddChildButton"
-                android:text="@string/add_child"
-                android:layout_width="wrap_content"
+                android:id="@+id/buttonJoinTeam"
+                android:layout_weight="1"
+                android:text="@string/join_team"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content" />
 
             <Button
-                android:id="@+id/cancelAddChildButton"
-                android:text="@string/cancel_button"
-                android:layout_width="wrap_content"
+                android:id="@+id/buttonAddToTeam"
+                android:layout_weight="1"
+                android:text="@string/add_to_team"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
+        <!-- Children Levels -->
+        <TextView
+            android:text="@string/children_levels"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/layoutChildrenLevels"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Date Filter -->
+        <Button
+            android:id="@+id/buttonDatePicker"
+            android:text="@string/select_date"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/buttonClearDate"
+            android:text="@string/clear_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- Chores List -->
         <TextView
             android:text="@string/upcoming_chores"
             android:textStyle="bold"
@@ -80,18 +95,19 @@
             android:layout_height="wrap_content" />
 
         <LinearLayout
-            android:id="@+id/choresListLayout"
+            android:id="@+id/layoutChoreList"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <!-- Logout -->
         <Button
-            android:id="@+id/logoutButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/buttonLogout"
             android:text="@string/log_out"
             android:layout_marginTop="24dp"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 </ScrollView>

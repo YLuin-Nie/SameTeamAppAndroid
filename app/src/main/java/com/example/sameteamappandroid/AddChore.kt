@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sameteamappandroid.databinding.ActivityAddChoreBinding
+import org.threeten.bp.LocalDate
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -12,6 +13,7 @@ class AddChore : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddChoreBinding
     private lateinit var childList: List<User>
+    private lateinit var allChores: List<Chore>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +38,7 @@ class AddChore : AppCompatActivity() {
                         childList.map { it.username }
                     )
                     binding.userSpinner.adapter = adapter
+                    fetchChores()
                 } else {
                     Toast.makeText(this@AddChore, "Failed to fetch users", Toast.LENGTH_SHORT).show()
                 }
@@ -43,6 +46,128 @@ class AddChore : AppCompatActivity() {
 
             override fun onFailure(call: Call<List<User>>, t: Throwable) {
                 Toast.makeText(this@AddChore, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun fetchChores() {
+        RetrofitClient.instance.fetchChores().enqueue(object : Callback<List<Chore>> {
+            override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
+                if (response.isSuccessful) {
+                    allChores = response.body() ?: emptyList()
+                    displayPendingChores()
+                }
+            }
+
+            override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
+                Toast.makeText(this@AddChore, "Error fetching chores", Toast.LENGTH_SHORT).show()
+            }
+        })
+
+        RetrofitClient.instance.fetchCompletedChores().enqueue(object : Callback<List<Chore>> {
+            override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
+                if (response.isSuccessful) {
+                    displayCompletedChores(response.body() ?: emptyList())
+                }
+            }
+
+            override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
+                Toast.makeText(this@AddChore, "Error fetching completed chores", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun displayPendingChores() {
+        binding.pendingChoresLayout.removeAllViews()
+
+        val pending = allChores.filter { !it.completed }
+        if (pending.isEmpty()) {
+            binding.pendingChoresLayout.addView(TextView(this).apply {
+                text = getString(R.string.no_pending)
+            })
+            return
+        }
+
+        for (chore in pending) {
+            val assignedChild = childList.find { it.userId == chore.assignedTo }
+            val choreText = "${chore.choreText} — ${chore.points} pts — Assigned to: ${assignedChild?.username ?: "Unknown"}"
+
+            val itemLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(0, 12, 0, 12)
+            }
+
+            val textView = TextView(this).apply { text = choreText }
+            val button = Button(this).apply {
+                text = getString(R.string.complete_button)
+                setOnClickListener { completeChore(chore.choreId) }
+            }
+
+            itemLayout.addView(textView)
+            itemLayout.addView(button)
+            binding.pendingChoresLayout.addView(itemLayout)
+        }
+    }
+
+    private fun displayCompletedChores(completed: List<Chore>) {
+        binding.completedChoresLayout.removeAllViews()
+
+        val recent = completed.filter {
+            LocalDate.parse(it.dateAssigned).isAfter(LocalDate.now().minusDays(8))
+        }
+
+        if (recent.isEmpty()) {
+            binding.completedChoresLayout.addView(TextView(this).apply {
+                text = getString(R.string.no_completed)
+            })
+            return
+        }
+
+        for (chore in recent) {
+            val assignedChild = childList.find { it.userId == chore.assignedTo }
+            val choreText = "${chore.choreText} — ${chore.points} pts — ${assignedChild?.username ?: "Unknown"}"
+
+            val itemLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(0, 12, 0, 12)
+            }
+
+            val textView = TextView(this).apply {
+                text = choreText
+                paint.isStrikeThruText = true
+            }
+
+            val button = Button(this).apply {
+                text = getString(R.string.undo_button)
+                setOnClickListener { undoCompletedChore(chore.choreId) }
+            }
+
+            itemLayout.addView(textView)
+            itemLayout.addView(button)
+            binding.completedChoresLayout.addView(itemLayout)
+        }
+    }
+
+    private fun completeChore(choreId: Int) {
+        RetrofitClient.instance.moveChoreToCompleted(choreId).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                fetchChores()
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@AddChore, "Failed to complete chore", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun undoCompletedChore(completedId: Int) {
+        RetrofitClient.instance.undoCompletedChore(completedId).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                fetchChores()
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@AddChore, "Failed to undo chore", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -70,10 +195,10 @@ class AddChore : AppCompatActivity() {
         RetrofitClient.instance.postChore(chore).enqueue(object : Callback<Chore> {
             override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(this@AddChore, "Chore added!", Toast.LENGTH_SHORT).show()
-                    finish() // optionally refresh instead
+                    Toast.makeText(this@AddChore, getString(R.string.chore_success), Toast.LENGTH_SHORT).show()
+                    fetchChores()
                 } else {
-                    Toast.makeText(this@AddChore, "Failed to add chore", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddChore, getString(R.string.chore_fail), Toast.LENGTH_SHORT).show()
                 }
             }
 

@@ -1,5 +1,7 @@
 package com.example.sameteamappandroid
 
+import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -14,8 +16,8 @@ class ChildDashboard : AppCompatActivity() {
     private lateinit var binding: ActivityChildDashBoardBinding
     private var currentUserId: Int = -1
     private var allChores: List<Chore> = listOf()
-    private var points: Int = 0
-    private var totalPoints: Int = 0
+    private var completedChores: List<Chore> = listOf()
+    private var selectedDate: LocalDate? = null
     private val levelThresholds = listOf(0, 200, 400, 600, 1000, 10000)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +32,27 @@ class ChildDashboard : AppCompatActivity() {
         } else {
             Toast.makeText(this, getString(R.string.user_not_found), Toast.LENGTH_SHORT).show()
         }
+
+        binding.signOutButton.setOnClickListener {
+            val sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+            sharedPref.edit().clear().apply()
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
+
+        binding.datePickerButton.setOnClickListener {
+            val today = LocalDate.now()
+            val datePicker = DatePickerDialog(this, { _, year, month, day ->
+                selectedDate = LocalDate.of(year, month + 1, day)
+                displayChoresForSelectedDate()
+            }, today.year, today.monthValue - 1, today.dayOfMonth)
+            datePicker.show()
+        }
+
+        binding.clearDateButton.setOnClickListener {
+            selectedDate = null
+            displayUpcomingChores()
+        }
     }
 
     private fun fetchChores() {
@@ -37,7 +60,7 @@ class ChildDashboard : AppCompatActivity() {
             override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
                 if (response.isSuccessful) {
                     allChores = response.body()?.filter { it.assignedTo == currentUserId } ?: listOf()
-                    updateUI()
+                    fetchCompleted()
                 }
             }
             override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
@@ -46,26 +69,74 @@ class ChildDashboard : AppCompatActivity() {
         })
     }
 
-    private fun updateUI() {
-        val earned = allChores.filter { it.completed }.sumOf { it.points }
-        totalPoints = earned
-        points = earned
+    private fun fetchCompleted() {
+        RetrofitClient.instance.fetchCompletedChores().enqueue(object : Callback<List<Chore>> {
+            override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
+                if (response.isSuccessful) {
+                    completedChores = response.body()?.filter { it.assignedTo == currentUserId } ?: listOf()
+                    updateDashboard()
+                }
+            }
+            override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
+                Toast.makeText(this@ChildDashboard, getString(R.string.chore_fail), Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
-        binding.totalPointsText.text = getString(R.string.total_points) + " $totalPoints"
-        binding.unspentPointsText.text = getString(R.string.unspent_points) + " $points"
+    private fun updateDashboard() {
+        val earnedPoints = completedChores.sumOf { it.points }
+        val levelIndex = levelThresholds.indexOfFirst { earnedPoints < it }.takeIf { it > 0 } ?: levelThresholds.size
+        val levelNames = resources.getStringArray(R.array.levels_array)
 
-        val level = levelThresholds.indexOfFirst { totalPoints < it }.takeIf { it > 0 } ?: levelThresholds.size
-        val levelNames = resources.getStringArray(R.array.levels_array).toList()
+        binding.totalPointsText.text = getString(R.string.total_points) + " $earnedPoints"
+        binding.unspentPointsText.text = getString(R.string.unspent_points_label) + " $earnedPoints"
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, levelNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.levelSpinner.adapter = adapter
-        binding.levelSpinner.setSelection(level - 1)
+        binding.levelSpinner.setSelection(levelIndex - 1)
         binding.levelSpinner.isEnabled = false
 
-        binding.progressBar.max = levelThresholds.getOrElse(level) { levelThresholds.last() }
-        binding.progressBar.progress = totalPoints
+        binding.progressBar.max = levelThresholds.getOrElse(levelIndex) { levelThresholds.last() }
+        binding.progressBar.progress = earnedPoints
 
+        if (selectedDate != null) displayChoresForSelectedDate() else displayUpcomingChores()
+    }
+
+    private fun displayChoresForSelectedDate() {
+        binding.upcomingChoresLayout.removeAllViews()
+
+        val filtered = allChores.filter {
+            !it.completed && LocalDate.parse(it.dateAssigned) == selectedDate
+        }
+
+        if (filtered.isEmpty()) {
+            val tv = TextView(this).apply { text = getString(R.string.no_chores_for_date) }
+            binding.upcomingChoresLayout.addView(tv)
+        } else {
+            for (chore in filtered) {
+                val layout = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    setPadding(0, 8, 0, 8)
+                }
+
+                val tv = TextView(this).apply {
+                    text = "${chore.choreText}\nDue: ${chore.dateAssigned}\nPoints: ${chore.points}"
+                }
+
+                val btn = Button(this).apply {
+                    text = getString(R.string.complete_button)
+                    setOnClickListener { markChoreComplete(chore) }
+                }
+
+                layout.addView(tv)
+                layout.addView(btn)
+                binding.upcomingChoresLayout.addView(layout)
+            }
+        }
+    }
+
+    private fun displayUpcomingChores() {
         val today = LocalDate.now()
         val upcoming = allChores.filter {
             !it.completed && LocalDate.parse(it.dateAssigned) in today..today.plusDays(6)
@@ -74,10 +145,8 @@ class ChildDashboard : AppCompatActivity() {
         binding.upcomingChoresLayout.removeAllViews()
 
         if (upcoming.isEmpty()) {
-            val noTasks = TextView(this).apply {
-                text = getString(R.string.no_upcoming_chores)
-            }
-            binding.upcomingChoresLayout.addView(noTasks)
+            val tv = TextView(this).apply { text = getString(R.string.no_upcoming_chores) }
+            binding.upcomingChoresLayout.addView(tv)
         } else {
             for (chore in upcoming) {
                 val layout = LinearLayout(this).apply {
@@ -85,17 +154,17 @@ class ChildDashboard : AppCompatActivity() {
                     setPadding(0, 8, 0, 8)
                 }
 
-                val choreText = TextView(this).apply {
+                val tv = TextView(this).apply {
                     text = "${chore.choreText}\nDue: ${chore.dateAssigned}\nPoints: ${chore.points}"
                 }
 
-                val button = Button(this).apply {
+                val btn = Button(this).apply {
                     text = getString(R.string.complete_button)
                     setOnClickListener { markChoreComplete(chore) }
                 }
 
-                layout.addView(choreText)
-                layout.addView(button)
+                layout.addView(tv)
+                layout.addView(btn)
                 binding.upcomingChoresLayout.addView(layout)
             }
         }
