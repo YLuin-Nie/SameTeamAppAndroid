@@ -1,0 +1,22 @@
+html, body {
+    height: 100vh; /* Ensures the body takes exactly the viewport height */
+    width: 100vw; /* Ensures full viewport width */
+    margin: 0;
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+    overflow-y: auto; /* Allows vertical scrolling */
+    background: linear-gradient(to bottom, #c8e9f8, #81D4FA, #4FC3F7, #29B6F6, #039BE5, #0277BD);
+    color: black;
+    display: flex;
+    justify-content: flex-start; /* Ensures content starts from the top */
+    align-items: center;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+body.dark-mode {
+    background: linear-gradient(to bottom, #8A4FAD, #693B93, #4A2763, #2E1A47, #1A0F30, #0A0515);
+
+}
+
