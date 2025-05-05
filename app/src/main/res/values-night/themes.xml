@@ -2,6 +2,15 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.SameTeamAppAndroid" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="android:windowBackground">@color/purple_700</item>
+        <item name="colorPrimary">@color/light_purple_button</item>
+        <item name="android:buttonStyle">@style/CustomButtonStyle</item>
+    </style>
+
+    <style name="Theme.SameTeamAppAndroid" parent="Base.Theme.SameTeamAppAndroid" />
+
+    <!-- Custom button style -->
+    <style name="CustomButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@android:color/white</item>
     </style>
 </resources>

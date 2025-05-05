@@ -18,6 +18,9 @@ class MainActivity : AppCompatActivity() {
         AndroidThreeTen.init(this)
 
         val sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        darkModeEnabled = sharedPref.getBoolean("darkMode", false)
+        applyDarkMode(darkModeEnabled)
+
         val token = sharedPref.getString("token", null)
         val role = sharedPref.getString("role", null)
 
@@ -34,6 +37,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Initialize the switch state based on the current theme
+        binding.toggleThemeSwitch.isChecked = darkModeEnabled
+
         binding.signInButton.setOnClickListener {
             startActivity(Intent(this, SignIn::class.java))
         }
@@ -42,15 +48,37 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SignUp::class.java))
         }
 
-        binding.toggleThemeButton.setOnClickListener {
-            darkModeEnabled = !darkModeEnabled
+        binding.toggleThemeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            darkModeEnabled = isChecked
             applyDarkMode(darkModeEnabled)
+            updateLogo() // Update the logo when the theme changes
         }
+
+        // Update the logo initially
+        updateLogo()
     }
 
     private fun applyDarkMode(enabled: Boolean) {
         AppCompatDelegate.setDefaultNightMode(
             if (enabled) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
         )
+        // Save the dark mode state
+        val sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putBoolean("darkMode", enabled)
+            apply()
+        }
+    }
+
+    private fun updateLogo() {
+        val isDarkMode = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+        if (isDarkMode) {
+            binding.logoImageView.setImageResource(R.drawable.logodark)
+        } else {
+            binding.logoImageView.setImageResource(R.drawable.logo)
+        }
     }
 }

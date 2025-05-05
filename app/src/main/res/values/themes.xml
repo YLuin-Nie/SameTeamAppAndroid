@@ -2,8 +2,15 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.SameTeamAppAndroid" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:windowBackground">@color/white</item>
+        <item name="colorPrimary">@color/blue_button</item>
+        <item name="android:buttonStyle">@style/CustomButtonStyle</item>
     </style>
 
     <style name="Theme.SameTeamAppAndroid" parent="Base.Theme.SameTeamAppAndroid" />
+
+    <!-- Custom button style -->
+    <style name="CustomButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
 </resources>
