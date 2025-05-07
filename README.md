@@ -13,7 +13,7 @@ The SameTeamAppAndroid is a mobile productivity and parenting tool where parents
 - **Android Studio** – IDE for Android development
 - **Jetpack Compose & XML Layouts** – UI structure
 - **Retrofit** – For making API calls to the backend
-- **LiveData / ViewModel** – For UI state management (optional, if used)
+- **LiveData / ViewModel** – For UI state management
 - **.NET Core Web API** – Backend service for user authentication, chores, and rewards
 
 ## 🔒 Features

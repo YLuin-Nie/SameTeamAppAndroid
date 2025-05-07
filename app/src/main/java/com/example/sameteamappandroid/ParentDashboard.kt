@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.WindowManager
 import android.widget.*
@@ -95,6 +96,17 @@ class ParentDashboard : AppCompatActivity() {
             R.layout.popup_create_team -> {
                 val nameField = view.findViewById<EditText>(R.id.editCreateTeamName)
                 val passField = view.findViewById<EditText>(R.id.editCreateTeamPassword)
+                val eyeIcon = view.findViewById<ImageView>(R.id.eyeCreateTeamPassword)
+                var showPass = false
+                eyeIcon.setOnClickListener {
+                    showPass = !showPass
+                    passField.inputType = if (showPass)
+                        InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    else
+                        InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    eyeIcon.setImageResource(if (showPass) R.drawable.ic_eye_open else R.drawable.ic_eye_closed)
+                }
+
                 view.findViewById<Button>(R.id.buttonSubmitCreateTeam).setOnClickListener {
                     val req = CreateTeamRequest(currentUserId, nameField.text.toString(), passField.text.toString())
                     RetrofitClient.instance.createTeam(req).enqueue(object : Callback<Team> {
@@ -112,6 +124,17 @@ class ParentDashboard : AppCompatActivity() {
             R.layout.popup_join_team -> {
                 val nameField = view.findViewById<EditText>(R.id.editJoinTeamName)
                 val passField = view.findViewById<EditText>(R.id.editJoinTeamPassword)
+                val eyeIcon = view.findViewById<ImageView>(R.id.eyeJoinTeamPassword)
+                var showPass = false
+                eyeIcon.setOnClickListener {
+                    showPass = !showPass
+                    passField.inputType = if (showPass)
+                        InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    else
+                        InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    eyeIcon.setImageResource(if (showPass) R.drawable.ic_eye_open else R.drawable.ic_eye_closed)
+                }
+
                 view.findViewById<Button>(R.id.buttonSubmitJoinTeam).setOnClickListener {
                     val req = JoinTeamRequest(currentUserId, nameField.text.toString(), passField.text.toString())
                     RetrofitClient.instance.joinTeam(req).enqueue(object : Callback<Team> {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <color name="black">#000000</color>
     <color name="white">#F0FFFF</color>
     <color name="blue_button">#007bff</color> <!-- For light mode buttons -->
     <color name="purple_700">#280137</color> <!-- For dark mode background -->
