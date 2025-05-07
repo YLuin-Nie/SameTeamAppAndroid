@@ -25,6 +25,7 @@ class ParentDashboard : AppCompatActivity() {
     private var currentTeamId: Int? = null
     private var children: List<User> = listOf()
     private var allChores: List<Chore> = listOf()
+    private var completedChores: List<Chore> = listOf() // ✅ New variable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,10 +86,7 @@ class ParentDashboard : AppCompatActivity() {
         val dialog = Dialog(this)
         val view = layoutInflater.inflate(layoutId, null)
         dialog.setContentView(view)
-        dialog.window?.setLayout(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.WRAP_CONTENT
-        )
+        dialog.window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.show()
 
@@ -241,13 +239,31 @@ class ParentDashboard : AppCompatActivity() {
             override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
                 if (response.isSuccessful) {
                     allChores = response.body() ?: listOf()
-                    displayChildrenLevels()
+                    fetchCompletedChoresThenUpdate() // ✅ NEW: Fetch completed separately
                     displayUpcomingChores()
                 }
             }
 
             override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
                 showToast("Error loading chores: ${t.message}")
+            }
+        })
+    }
+
+    // ✅ NEW: Fetch completed chores
+    private fun fetchCompletedChoresThenUpdate() {
+        RetrofitClient.instance.fetchCompletedChores().enqueue(object : Callback<List<Chore>> {
+            override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
+                if (response.isSuccessful) {
+                    completedChores = response.body() ?: listOf()
+                    displayChildrenLevels()
+                } else {
+                    showToast("Failed to load completed chores.")
+                }
+            }
+
+            override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
+                showToast("Error: ${t.message}")
             }
         })
     }
@@ -260,7 +276,7 @@ class ParentDashboard : AppCompatActivity() {
         val colors = listOf("#cccccc", "#ccffcc", "#aaaaff", "#ffffaa", "#ffcc88")
 
         for (child in children) {
-            val points = allChores.filter { it.assignedTo == child.userId && it.completed }.sumOf { it.points }
+            val points = completedChores.filter { it.assignedTo == child.userId }.sumOf { it.points }
             val levelIndex = thresholds.indexOfFirst { points < it }.let { if (it > 0) it - 1 else 0 }
 
             val container = LinearLayout(this).apply {
@@ -311,11 +327,6 @@ class ParentDashboard : AppCompatActivity() {
         }
     }
 
-
-
-
-
-
     private fun displayUpcomingChores() {
         val today = LocalDate.now()
         val endDate = today.plusDays(6)
@@ -344,7 +355,6 @@ class ParentDashboard : AppCompatActivity() {
             }
         }
     }
-
 
     private fun displayChoresOnDate(date: LocalDate) {
         displayChoresInRange(date, date)
@@ -390,9 +400,3 @@ class ParentDashboard : AppCompatActivity() {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
     }
 }
-
-
-
-
-
-
