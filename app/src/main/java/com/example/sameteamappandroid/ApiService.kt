@@ -78,6 +78,12 @@ interface ApiService {
     @POST("Users/removeFromTeam/{userId}")
     fun removeUserFromTeam(@Path("userId") userId: Int): Call<Void>
 
+    @PUT("Users/{userId}/points")
+    fun updateUserPoints(
+        @Path("userId") userId: Int,
+        @Body request: Map<String, Int>
+    ): Call<Void>
+
 
     // ---------- CHORES ---------- //
     @POST("Chores")

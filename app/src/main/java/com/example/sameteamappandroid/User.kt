@@ -6,5 +6,6 @@ data class User(
     val email: String,
     val role: String,
     val points: Int,
+    val totalPoints: Int,
     val teamId: Int?
 )

@@ -167,15 +167,32 @@ class ChildRewards : AppCompatActivity() {
             dateRedeemed = LocalDate.now().toString()
         )
 
+        // First: post redemption
         RetrofitClient.instance.postRedeemedReward(redemption).enqueue(object : Callback<RedeemedReward> {
             override fun onResponse(call: Call<RedeemedReward>, response: Response<RedeemedReward>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(
-                        this@ChildRewards,
-                        getString(R.string.redemption_success_format, reward.name),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    loadRedeemed()
+                    // Then: deduct points
+                    val newPoints = points - reward.cost
+                    val updateRequest = mapOf("points" to newPoints)
+
+                    RetrofitClient.instance.updateUserPoints(userId, updateRequest).enqueue(object : Callback<Void> {
+                        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                            if (response.isSuccessful) {
+                                Toast.makeText(
+                                    this@ChildRewards,
+                                    getString(R.string.redemption_success_format, reward.name),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                loadRedeemed()
+                            } else {
+                                Toast.makeText(this@ChildRewards, "Reward saved, but failed to update points", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                            Toast.makeText(this@ChildRewards, "Reward saved, but failed to update points", Toast.LENGTH_SHORT).show()
+                        }
+                    })
                 } else {
                     Toast.makeText(this@ChildRewards, getString(R.string.redemption_failed), Toast.LENGTH_SHORT).show()
                 }
@@ -186,4 +203,5 @@ class ChildRewards : AppCompatActivity() {
             }
         })
     }
+
 }

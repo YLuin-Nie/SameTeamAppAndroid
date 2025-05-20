@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sameteamappandroid.databinding.ActivityChoresListBinding
+import org.threeten.bp.LocalDate
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import org.threeten.bp.LocalDate
 
 class ChoresList : AppCompatActivity() {
 
@@ -56,7 +56,35 @@ class ChoresList : AppCompatActivity() {
             override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
                 if (response.isSuccessful) {
                     allChores = response.body()?.filter { it.assignedTo == currentUserId } ?: emptyList()
-                    displayChores()
+
+                    // 🟡 Fetch completed chores from CompletedChores table
+                    RetrofitClient.instance.fetchCompletedChores().enqueue(object : Callback<List<Chore>> {
+                        override fun onResponse(call: Call<List<Chore>>, completedRes: Response<List<Chore>>) {
+                            if (completedRes.isSuccessful) {
+                                val completedChores = completedRes.body()?.filter { it.assignedTo == currentUserId } ?: listOf()
+                                val earnedPoints = completedChores.sumOf { it.points }
+
+                                // 🟡 Fetch redeemed rewards
+                                RetrofitClient.instance.fetchRedeemedRewards(currentUserId).enqueue(object : Callback<List<RedeemedReward>> {
+                                    override fun onResponse(call: Call<List<RedeemedReward>>, rewardRes: Response<List<RedeemedReward>>) {
+                                        val redeemed = rewardRes.body() ?: listOf()
+                                        val spentPoints = redeemed.sumOf { it.pointsSpent }
+                                        val unspentPoints = earnedPoints - spentPoints
+                                        binding.pointsTextView.text = getString(R.string.your_points) + " $unspentPoints"
+                                    }
+
+                                    override fun onFailure(call: Call<List<RedeemedReward>>, t: Throwable) {}
+                                })
+
+                                displayChores(completedChores)
+                            }
+                        }
+
+                        override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
+                            Toast.makeText(this@ChoresList, "Error loading completed chores", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+
                 } else {
                     Toast.makeText(this@ChoresList, "Failed to load chores", Toast.LENGTH_SHORT).show()
                 }
@@ -68,17 +96,16 @@ class ChoresList : AppCompatActivity() {
         })
     }
 
-    private fun displayChores() {
+    private fun displayChores(completedChores: List<Chore>) {
         val today = LocalDate.now()
         val sevenDaysAgo = today.minusDays(7)
 
         val pending = allChores.filter { !it.completed }
-        val completed = allChores.filter { it.completed && LocalDate.parse(it.dateAssigned) >= sevenDaysAgo }
+        val recentCompleted = completedChores.filter { LocalDate.parse(it.dateAssigned) >= sevenDaysAgo }
 
-        val totalPoints = completed.sumOf { it.points }
-        val completionPercent = if (allChores.isNotEmpty()) (completed.size * 100 / allChores.size) else 0
+        val completionPercent =
+            if (allChores.isNotEmpty()) (recentCompleted.size * 100 / allChores.size) else 0
 
-        binding.pointsTextView.text = getString(R.string.your_points) + " $totalPoints"
         binding.progressTextView.text = getString(R.string.task_progress) + " $completionPercent%"
         binding.progressBar.progress = completionPercent
 
@@ -86,17 +113,21 @@ class ChoresList : AppCompatActivity() {
         binding.completedLayout.removeAllViews()
 
         if (pending.isEmpty()) {
-            binding.pendingLayout.addView(TextView(this).apply { text = getString(R.string.no_pending) })
+            binding.pendingLayout.addView(TextView(this).apply {
+                text = getString(R.string.no_pending)
+            })
         } else {
             pending.forEach { chore ->
                 binding.pendingLayout.addView(createChoreItem(chore, true))
             }
         }
 
-        if (completed.isEmpty()) {
-            binding.completedLayout.addView(TextView(this).apply { text = getString(R.string.no_completed) })
+        if (recentCompleted.isEmpty()) {
+            binding.completedLayout.addView(TextView(this).apply {
+                text = getString(R.string.no_completed)
+            })
         } else {
-            completed.forEach { chore ->
+            recentCompleted.forEach { chore ->
                 binding.completedLayout.addView(createChoreItem(chore, false))
             }
         }
@@ -119,9 +150,7 @@ class ChoresList : AppCompatActivity() {
 
         val actionButton = Button(this).apply {
             text = getString(if (isPending) R.string.complete_button else R.string.undo_button)
-            setOnClickListener {
-                toggleCompletion(chore)
-            }
+            setOnClickListener { toggleCompletion(chore, isPending) }
         }
 
         layout.addView(choreText)
@@ -130,20 +159,31 @@ class ChoresList : AppCompatActivity() {
         return layout
     }
 
-    private fun toggleCompletion(chore: Chore) {
-        val updated = chore.copy(completed = !chore.completed)
-        RetrofitClient.instance.completeChore(chore.choreId, updated).enqueue(object : Callback<Chore> {
-            override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
-                if (response.isSuccessful) {
-                    fetchChores()
-                } else {
-                    Toast.makeText(this@ChoresList, "Failed to update chore", Toast.LENGTH_SHORT).show()
-                }
-            }
+    private fun toggleCompletion(chore: Chore, isPending: Boolean) {
+        if (isPending) {
+            RetrofitClient.instance.moveChoreToCompleted(chore.choreId)
+                .enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        if (response.isSuccessful) fetchChores()
+                        else Toast.makeText(this@ChoresList, "Failed to complete chore", Toast.LENGTH_SHORT).show()
+                    }
 
-            override fun onFailure(call: Call<Chore>, t: Throwable) {
-                Toast.makeText(this@ChoresList, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Toast.makeText(this@ChoresList, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+        } else {
+            RetrofitClient.instance.undoCompletedChore(chore.choreId)
+                .enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        if (response.isSuccessful) fetchChores()
+                        else Toast.makeText(this@ChoresList, "Failed to undo chore", Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Toast.makeText(this@ChoresList, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+        }
     }
 }
