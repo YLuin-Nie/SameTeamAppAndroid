@@ -139,18 +139,21 @@ class ChildRewards : AppCompatActivity() {
             binding.redeemedHistoryLayout.addView(empty)
         } else {
             for (reward in redeemedRewards) {
+                val name = if (!reward.rewardName.isNullOrBlank()) {
+                    reward.rewardName
+                } else {
+                    rewards.find { it.rewardId == reward.rewardId }?.name ?: "Unnamed Reward"
+                }
+
                 val rewardView = TextView(this).apply {
-                    text = getString(
-                        R.string.redeemed_item_format,
-                        reward.rewardName,
-                        reward.pointsSpent,
-                        reward.dateRedeemed
-                    )
+                    text = "$name - ${reward.pointsSpent} Points\nRedeemed on: ${reward.dateRedeemed}"
+                    setPadding(0, 8, 0, 8)
                 }
                 binding.redeemedHistoryLayout.addView(rewardView)
             }
         }
     }
+
 
     private fun redeem(reward: Reward) {
         if (points < reward.cost) {

@@ -17,6 +17,7 @@ class ParentRewards : AppCompatActivity() {
     private lateinit var binding: ActivityParentRewardsBinding
     private lateinit var children: List<User>
     private lateinit var rewards: MutableList<Reward>
+    private var currentEditingReward: Reward? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -142,6 +143,45 @@ class ParentRewards : AppCompatActivity() {
                     })
                 }
             }
+
+            R.layout.popup_edit_reward -> {
+                val nameField = view.findViewById<EditText>(R.id.editRewardName)
+                val costField = view.findViewById<EditText>(R.id.editRewardCost)
+                val button = view.findViewById<Button>(R.id.buttonSubmitEditReward)
+
+                currentEditingReward?.let {
+                    nameField.setText(it.name)
+                    costField.setText(it.cost.toString())
+                }
+
+                button.setOnClickListener {
+                    val updatedName = nameField.text.toString().trim()
+                    val updatedCost = costField.text.toString().toIntOrNull() ?: 0
+
+                    if (updatedName.isEmpty() || updatedCost <= 0) {
+                        showToast("Please enter valid name and cost.")
+                        return@setOnClickListener
+                    }
+
+                    val updatedReward = Reward(currentEditingReward!!.rewardId, updatedName, updatedCost)
+                    RetrofitClient.instance.updateReward(updatedReward.rewardId, updatedReward).enqueue(object : Callback<Reward> {
+                        override fun onResponse(call: Call<Reward>, response: Response<Reward>) {
+                            if (response.isSuccessful) {
+                                val index = rewards.indexOfFirst { it.rewardId == updatedReward.rewardId }
+                                rewards[index] = response.body()!!
+                                displayRewards()
+                                showToast("Reward updated.")
+                                dialog.dismiss()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Reward>, t: Throwable) {
+                            showToast("Update failed: ${t.message}")
+                        }
+                    })
+                }
+            }
+
         }
     }
 
@@ -149,24 +189,59 @@ class ParentRewards : AppCompatActivity() {
         RetrofitClient.instance.fetchUsers().enqueue(object : Callback<List<User>> {
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
                 if (response.isSuccessful) {
-                    children = response.body()?.filter { it.role == "Child" } ?: emptyList()
+                    val allUsers = response.body() ?: emptyList()
+                    children = allUsers.filter { it.role == "Child" }
+
+                    // Load rewards
+                    RetrofitClient.instance.fetchRewards().enqueue(object : Callback<List<Reward>> {
+                        override fun onResponse(call: Call<List<Reward>>, response: Response<List<Reward>>) {
+                            if (response.isSuccessful) {
+                                rewards = response.body()?.toMutableList() ?: mutableListOf()
+                                displayRewards()
+                                fetchAllRedemptions()
+                            }
+                        }
+
+                        override fun onFailure(call: Call<List<Reward>>, t: Throwable) {}
+                    })
                 }
             }
 
             override fun onFailure(call: Call<List<User>>, t: Throwable) {}
         })
-
-        RetrofitClient.instance.fetchRewards().enqueue(object : Callback<List<Reward>> {
-            override fun onResponse(call: Call<List<Reward>>, response: Response<List<Reward>>) {
-                if (response.isSuccessful) {
-                    rewards = response.body()?.toMutableList() ?: mutableListOf()
-                    displayRewards()
-                }
-            }
-
-            override fun onFailure(call: Call<List<Reward>>, t: Throwable) {}
-        })
     }
+
+    private fun fetchAllRedemptions() {
+        val redemptionMap = mutableMapOf<String, MutableList<RedeemedReward>>()
+
+        if (children.isEmpty()) return
+
+        var completedRequests = 0
+
+        for (child in children) {
+            RetrofitClient.instance.fetchRedeemedRewards(child.userId).enqueue(object : Callback<List<RedeemedReward>> {
+                override fun onResponse(call: Call<List<RedeemedReward>>, response: Response<List<RedeemedReward>>) {
+                    if (response.isSuccessful) {
+                        val redemptions = response.body() ?: listOf()
+                        redemptionMap[child.username] = redemptions.toMutableList()
+                    }
+                    completedRequests++
+                    if (completedRequests == children.size) {
+                        displayRedeemedGroupedByChild(redemptionMap)
+                    }
+                }
+
+                override fun onFailure(call: Call<List<RedeemedReward>>, t: Throwable) {
+                    completedRequests++
+                    if (completedRequests == children.size) {
+                        displayRedeemedGroupedByChild(redemptionMap)
+                    }
+                }
+            })
+        }
+    }
+
+
 
     private fun displayRewards() {
         binding.rewardListLayout.removeAllViews()
@@ -186,31 +261,8 @@ class ParentRewards : AppCompatActivity() {
             val editButton = Button(this).apply {
                 text = getString(R.string.edit)
                 setOnClickListener {
-                    rewardText.isEnabled = true
-                    rewardText.setText(reward.name)
-                    text = getString(R.string.save)
-
-                    setOnClickListener {
-                        val parts = rewardText.text.toString().split("-")
-                        val updatedName = parts.getOrNull(0)?.trim() ?: reward.name
-                        val updatedCost = parts.getOrNull(1)?.trim()?.split(" ")?.getOrNull(0)?.toIntOrNull() ?: reward.cost
-
-                        val updatedReward = Reward(reward.rewardId, updatedName, updatedCost)
-                        RetrofitClient.instance.updateReward(reward.rewardId, updatedReward).enqueue(object : Callback<Reward> {
-                            override fun onResponse(call: Call<Reward>, response: Response<Reward>) {
-                                if (response.isSuccessful) {
-                                    val index = rewards.indexOfFirst { it.rewardId == reward.rewardId }
-                                    rewards[index] = response.body()!!
-                                    displayRewards()
-                                    showToast("Reward updated")
-                                }
-                            }
-
-                            override fun onFailure(call: Call<Reward>, t: Throwable) {
-                                showToast("Update failed")
-                            }
-                        })
-                    }
+                    currentEditingReward = reward
+                    showPopup(R.layout.popup_edit_reward)
                 }
             }
 
@@ -237,6 +289,42 @@ class ParentRewards : AppCompatActivity() {
             binding.rewardListLayout.addView(container)
         }
     }
+
+    private fun displayRedeemedGroupedByChild(redeemedMap: Map<String, List<RedeemedReward>>) {
+        binding.redeemedHistoryLayout.removeAllViews()
+
+        if (redeemedMap.isEmpty()) {
+            val empty = TextView(this).apply {
+                text = getString(R.string.no_redemptions)
+            }
+            binding.redeemedHistoryLayout.addView(empty)
+            return
+        }
+
+        for ((childName, rewardsList) in redeemedMap) {
+            val childHeader = TextView(this).apply {
+                text = childName
+                textSize = 18f
+                setPadding(0, 16, 0, 8)
+            }
+            binding.redeemedHistoryLayout.addView(childHeader)
+
+            for (reward in rewardsList) {
+                val name = if (!reward.rewardName.isNullOrBlank()) {
+                    reward.rewardName
+                } else {
+                    rewards.find { it.rewardId == reward.rewardId }?.name ?: "Unnamed Reward"
+                }
+
+                val rewardView = TextView(this).apply {
+                    text = "$name - ${reward.pointsSpent} Points\nRedeemed on: ${reward.dateRedeemed}"
+                    setPadding(0, 4, 0, 4)
+                }
+                binding.redeemedHistoryLayout.addView(rewardView)
+            }
+        }
+    }
+
 
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()

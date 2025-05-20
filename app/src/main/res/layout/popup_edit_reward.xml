@@ -2,18 +2,19 @@
     android:padding="16dp"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@android:color/white">
 
     <EditText
         android:id="@+id/editRewardName"
-        android:layout_width="378dp"
-        android:layout_height="61dp"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
         android:hint="@string/reward_name_label" />
 
     <EditText
         android:id="@+id/editRewardCost"
-        android:layout_width="386dp"
-        android:layout_height="62dp"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
         android:hint="@string/points_label"
         android:inputType="number" />
 
