@@ -62,18 +62,23 @@ class ChoresList : AppCompatActivity() {
                         override fun onResponse(call: Call<List<Chore>>, completedRes: Response<List<Chore>>) {
                             if (completedRes.isSuccessful) {
                                 val completedChores = completedRes.body()?.filter { it.assignedTo == currentUserId } ?: listOf()
-                                val earnedPoints = completedChores.sumOf { it.points }
+
 
                                 // 🟡 Fetch redeemed rewards
-                                RetrofitClient.instance.fetchRedeemedRewards(currentUserId).enqueue(object : Callback<List<RedeemedReward>> {
-                                    override fun onResponse(call: Call<List<RedeemedReward>>, rewardRes: Response<List<RedeemedReward>>) {
-                                        val redeemed = rewardRes.body() ?: listOf()
-                                        val spentPoints = redeemed.sumOf { it.pointsSpent }
-                                        val unspentPoints = earnedPoints - spentPoints
-                                        binding.pointsTextView.text = getString(R.string.your_points) + " $unspentPoints"
+                                RetrofitClient.instance.getUser(currentUserId).enqueue(object : Callback<User> {
+                                    override fun onResponse(call: Call<User>, response: Response<User>) {
+                                        if (response.isSuccessful) {
+                                            val user = response.body()
+                                            val points = user?.points ?: 0
+                                            binding.pointsTextView.text = getString(R.string.your_points) + " $points"
+                                        } else {
+                                            binding.pointsTextView.text = getString(R.string.your_points) + " 0"
+                                        }
                                     }
 
-                                    override fun onFailure(call: Call<List<RedeemedReward>>, t: Throwable) {}
+                                    override fun onFailure(call: Call<User>, t: Throwable) {
+                                        binding.pointsTextView.text = getString(R.string.your_points) + " 0"
+                                    }
                                 })
 
                                 displayChores(completedChores)
@@ -103,9 +108,7 @@ class ChoresList : AppCompatActivity() {
         val pending = allChores.filter { !it.completed }
         val recentCompleted = completedChores.filter { LocalDate.parse(it.dateAssigned) >= sevenDaysAgo }
 
-        val completionPercent =
-            if (allChores.isNotEmpty()) (recentCompleted.size * 100 / allChores.size) else 0
-
+        val completionPercent = if (allChores.isNotEmpty() && allChores.all { it.completed }) 100 else 0
         binding.progressTextView.text = getString(R.string.task_progress) + " $completionPercent%"
         binding.progressBar.progress = completionPercent
 

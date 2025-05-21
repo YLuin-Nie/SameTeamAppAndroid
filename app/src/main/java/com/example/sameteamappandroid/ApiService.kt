@@ -60,6 +60,9 @@ interface ApiService {
     @GET("Users")
     fun fetchUsers(): Call<List<User>>
 
+    @GET("Users/{id}")
+    fun getUser(@Path("id") userId: Int): Call<User>
+
     @GET("Users/team/{teamId}")
     fun fetchTeam(@Path("teamId") teamId: Int): Call<Team>
 
