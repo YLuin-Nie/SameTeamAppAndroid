@@ -369,8 +369,12 @@ class ParentDashboard : AppCompatActivity() {
     private fun displayChoresInRange(startDate: LocalDate, endDate: LocalDate) {
         binding.layoutChoreList.removeAllViews()
 
+        val childUserIds = children.map { it.userId }
+
         val filtered = allChores.filter {
-            !it.completed && LocalDate.parse(it.dateAssigned).let { d -> !d.isBefore(startDate) && !d.isAfter(endDate) }
+            !it.completed &&
+                    childUserIds.contains(it.assignedTo) &&
+                    LocalDate.parse(it.dateAssigned).let { d -> !d.isBefore(startDate) && !d.isAfter(endDate) }
         }.sortedBy { it.dateAssigned }
 
         if (filtered.isEmpty()) {
@@ -378,14 +382,16 @@ class ParentDashboard : AppCompatActivity() {
             binding.layoutChoreList.addView(tv)
         } else {
             filtered.forEach { chore ->
+                val assignedTo = children.find { it.userId == chore.assignedTo }?.username ?: "Unknown"
                 val tv = TextView(this).apply {
-                    text = "${chore.choreText} - ${chore.dateAssigned} (${chore.points} pts)"
+                    text = "${chore.choreText} - ${chore.dateAssigned} - $assignedTo (${chore.points} pts)"
                     setPadding(0, 8, 0, 8)
                 }
                 binding.layoutChoreList.addView(tv)
             }
         }
     }
+
 
     private fun openDatePicker() {
         val c = Calendar.getInstance()

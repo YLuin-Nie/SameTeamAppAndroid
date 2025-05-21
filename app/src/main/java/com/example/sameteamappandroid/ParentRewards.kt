@@ -190,9 +190,16 @@ class ParentRewards : AppCompatActivity() {
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
                 if (response.isSuccessful) {
                     val allUsers = response.body() ?: emptyList()
-                    children = allUsers.filter { it.role == "Child" }
+                    val currentUserId = getSharedPreferences("AppPrefs", MODE_PRIVATE).getInt("userId", -1)
+                    val currentUser = allUsers.find { it.userId == currentUserId }
 
-                    // Load rewards
+                    if (currentUser == null) {
+                        showToast(getString(R.string.invalid_user))
+                        return
+                    }
+
+                    children = allUsers.filter { it.role == "Child" && it.teamId == currentUser.teamId }
+
                     RetrofitClient.instance.fetchRewards().enqueue(object : Callback<List<Reward>> {
                         override fun onResponse(call: Call<List<Reward>>, response: Response<List<Reward>>) {
                             if (response.isSuccessful) {
@@ -210,6 +217,7 @@ class ParentRewards : AppCompatActivity() {
             override fun onFailure(call: Call<List<User>>, t: Throwable) {}
         })
     }
+
 
     private fun fetchAllRedemptions() {
         val redemptionMap = mutableMapOf<String, MutableList<RedeemedReward>>()

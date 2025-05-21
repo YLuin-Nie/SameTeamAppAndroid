@@ -1,5 +1,7 @@
 package com.example.sameteamappandroid
 
+import android.app.DatePickerDialog
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.widget.*
@@ -9,10 +11,7 @@ import org.threeten.bp.LocalDate
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import android.app.DatePickerDialog
 import java.util.*
-import android.app.Dialog
-
 
 class AddChore : AppCompatActivity() {
 
@@ -34,59 +33,56 @@ class AddChore : AppCompatActivity() {
             val datePickerDialog = DatePickerDialog(
                 this,
                 { _, selectedYear, selectedMonth, selectedDay ->
-                    val monthStr = String.format("%02d", selectedMonth + 1)
-                    val dayStr = String.format("%02d", selectedDay)
-                    val selectedDate = "$selectedYear-$monthStr-$dayStr"
+                    val selectedDate = "%04d-%02d-%02d".format(selectedYear, selectedMonth + 1, selectedDay)
                     binding.dateEditText.setText(selectedDate)
                 },
                 year, month, day
             )
-
             datePickerDialog.show()
         }
 
-        // ✅ Navigation button handlers
         binding.buttonGoDashboard.setOnClickListener {
-            startActivity(Intent(this, ParentDashboard::class.java))
-            finish()
+            startActivity(Intent(this, ParentDashboard::class.java)); finish()
         }
-
         binding.buttonGoAddChore.setOnClickListener {
-            startActivity(Intent(this, AddChore::class.java))
-            finish()
+            startActivity(Intent(this, AddChore::class.java)); finish()
         }
-
         binding.buttonGoRewards.setOnClickListener {
-            startActivity(Intent(this, ParentRewards::class.java))
-            finish()
+            startActivity(Intent(this, ParentRewards::class.java)); finish()
         }
-
         binding.buttonLogout.setOnClickListener {
             val prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE).edit()
-            prefs.clear()
-            prefs.apply()
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            prefs.clear().apply()
+            startActivity(Intent(this, MainActivity::class.java)); finish()
         }
 
         fetchUsers()
-
-        binding.addChoreButton.setOnClickListener {
-            addChore()
-        }
+        binding.addChoreButton.setOnClickListener { addChore() }
     }
 
     private fun fetchUsers() {
         RetrofitClient.instance.fetchUsers().enqueue(object : Callback<List<User>> {
             override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
                 if (response.isSuccessful && response.body() != null) {
-                    childList = response.body()!!.filter { it.role == "Child" }
+                    val allUsers = response.body()!!
+                    val currentUserId = getSharedPreferences("AppPrefs", MODE_PRIVATE).getInt("userId", -1)
+                    val currentUser = allUsers.find { it.userId == currentUserId }
+
+                    if (currentUser == null) {
+                        Toast.makeText(this@AddChore, getString(R.string.invalid_user), Toast.LENGTH_SHORT).show()
+                        return
+                    }
+
+                    childList = allUsers.filter { it.role == "Child" && it.teamId == currentUser.teamId }
+
                     val adapter = ArrayAdapter(
                         this@AddChore,
                         android.R.layout.simple_spinner_item,
                         childList.map { it.username }
                     )
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     binding.userSpinner.adapter = adapter
+
                     fetchChores()
                 } else {
                     Toast.makeText(this@AddChore, "Failed to fetch users", Toast.LENGTH_SHORT).show()
@@ -107,7 +103,6 @@ class AddChore : AppCompatActivity() {
                     displayPendingChores()
                 }
             }
-
             override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
                 Toast.makeText(this@AddChore, "Error fetching chores", Toast.LENGTH_SHORT).show()
             }
@@ -119,7 +114,6 @@ class AddChore : AppCompatActivity() {
                     displayCompletedChores(response.body() ?: emptyList())
                 }
             }
-
             override fun onFailure(call: Call<List<Chore>>, t: Throwable) {
                 Toast.makeText(this@AddChore, "Error fetching completed chores", Toast.LENGTH_SHORT).show()
             }
@@ -129,7 +123,7 @@ class AddChore : AppCompatActivity() {
     private fun displayPendingChores() {
         binding.pendingChoresLayout.removeAllViews()
 
-        val pending = allChores.filter { !it.completed }
+        val pending = allChores.filter { !it.completed && childList.any { child -> child.userId == it.assignedTo } }
         if (pending.isEmpty()) {
             binding.pendingChoresLayout.addView(TextView(this).apply {
                 text = getString(R.string.no_pending)
@@ -175,14 +169,14 @@ class AddChore : AppCompatActivity() {
             itemLayout.addView(buttonLayout)
             binding.pendingChoresLayout.addView(itemLayout)
         }
-
     }
 
     private fun displayCompletedChores(completed: List<Chore>) {
         binding.completedChoresLayout.removeAllViews()
 
         val recent = completed.filter {
-            LocalDate.parse(it.dateAssigned).isAfter(LocalDate.now().minusDays(8))
+            LocalDate.parse(it.dateAssigned).isAfter(LocalDate.now().minusDays(8)) &&
+                    childList.any { child -> child.userId == it.assignedTo }
         }
 
         if (recent.isEmpty()) {
@@ -217,30 +211,6 @@ class AddChore : AppCompatActivity() {
         }
     }
 
-    private fun completeChore(choreId: Int) {
-        RetrofitClient.instance.moveChoreToCompleted(choreId).enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                fetchChores()
-            }
-
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                Toast.makeText(this@AddChore, "Failed to complete chore", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun undoCompletedChore(completedId: Int) {
-        RetrofitClient.instance.undoCompletedChore(completedId).enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                fetchChores()
-            }
-
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                Toast.makeText(this@AddChore, "Failed to undo chore", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
     private fun addChore() {
         val choreText = binding.choreTextEditText.text.toString().trim()
         val points = binding.pointsEditText.text.toString().toIntOrNull() ?: 10
@@ -260,7 +230,6 @@ class AddChore : AppCompatActivity() {
             assignedTo = selectedUser.userId,
             dateAssigned = date,
             completed = false
-
         )
 
         RetrofitClient.instance.postChore(chore).enqueue(object : Callback<Chore> {
@@ -279,89 +248,106 @@ class AddChore : AppCompatActivity() {
         })
     }
 
-    private fun showEditChorePopup(chore: Chore) {
-        val dialog = Dialog(this)
-        val view = layoutInflater.inflate(R.layout.popup_edit_chore, null)
-        dialog.setContentView(view)
-
-        val nameField = view.findViewById<EditText>(R.id.editChoreName)
-        val pointsField = view.findViewById<EditText>(R.id.editChorePoints)
-        val dateField = view.findViewById<EditText>(R.id.editChoreDate)
-        val spinner = view.findViewById<Spinner>(R.id.editChoreSpinner)
-        val submitButton = view.findViewById<Button>(R.id.buttonSubmitEditChore)
-
-        nameField.setText(chore.choreText)
-        pointsField.setText(chore.points.toString())
-        dateField.setText(chore.dateAssigned)
-
-        // Populate spinner with child usernames
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, childList.map { it.username })
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
-
-        // Pre-select the assigned child
-        val selectedIndex = childList.indexOfFirst { it.userId == chore.assignedTo }
-        if (selectedIndex != -1) {
-            spinner.setSelection(selectedIndex)
-        }
-
-        // Optional: add DatePicker to dateField
-        dateField.setOnClickListener {
-            val calendar = Calendar.getInstance()
-            val parts = chore.dateAssigned.split("-")
-            val year = parts[0].toInt()
-            val month = parts[1].toInt() - 1
-            val day = parts[2].toInt()
-
-            DatePickerDialog(this, { _, y, m, d ->
-                val selectedDate = String.format("%04d-%02d-%02d", y, m + 1, d)
-                dateField.setText(selectedDate)
-            }, year, month, day).show()
-        }
-
-        submitButton.setOnClickListener {
-            val newAssignedUser = childList[spinner.selectedItemPosition]
-
-            val updated = chore.copy(
-                choreText = nameField.text.toString().trim(),
-                points = pointsField.text.toString().toIntOrNull() ?: chore.points,
-                dateAssigned = dateField.text.toString().trim(),
-                assignedTo = newAssignedUser.userId
-            )
-
-            RetrofitClient.instance.updateChore(updated.choreId, updated).enqueue(object : Callback<Chore> {
-                override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
-                    fetchChores()
-                    dialog.dismiss()
-                }
-
-                override fun onFailure(call: Call<Chore>, t: Throwable) {
-                    Toast.makeText(this@AddChore, "Edit failed: ${t.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
-        }
-
-        val cancelButton = view.findViewById<Button>(R.id.buttonCancelEditChore)
-        cancelButton.setOnClickListener {
-            dialog.dismiss()
-        }
-
-
-        dialog.show()
+    private fun completeChore(choreId: Int) {
+        RetrofitClient.instance.moveChoreToCompleted(choreId).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                fetchChores()
+            }
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@AddChore, "Failed to complete chore", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
+    private fun undoCompletedChore(completedId: Int) {
+        RetrofitClient.instance.undoCompletedChore(completedId).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                fetchChores()
+            }
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@AddChore, "Failed to undo chore", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
     private fun deleteChore(choreId: Int) {
         RetrofitClient.instance.deleteChore(choreId).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 fetchChores()
             }
-
             override fun onFailure(call: Call<Void>, t: Throwable) {
                 Toast.makeText(this@AddChore, "Delete failed: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
+    private fun showEditChorePopup(chore: Chore) {
+            val dialog = Dialog(this)
+            val view = layoutInflater.inflate(R.layout.popup_edit_chore, null)
+            dialog.setContentView(view)
 
+            val nameField = view.findViewById<EditText>(R.id.editChoreName)
+            val pointsField = view.findViewById<EditText>(R.id.editChorePoints)
+            val dateField = view.findViewById<EditText>(R.id.editChoreDate)
+            val spinner = view.findViewById<Spinner>(R.id.editChoreSpinner)
+            val submitButton = view.findViewById<Button>(R.id.buttonSubmitEditChore)
+
+            nameField.setText(chore.choreText)
+            pointsField.setText(chore.points.toString())
+            dateField.setText(chore.dateAssigned)
+
+            // Populate spinner with child usernames
+            val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, childList.map { it.username })
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner.adapter = adapter
+
+            // Pre-select the assigned child
+            val selectedIndex = childList.indexOfFirst { it.userId == chore.assignedTo }
+            if (selectedIndex != -1) {
+                spinner.setSelection(selectedIndex)
+            }
+
+            // Optional: add DatePicker to dateField
+            dateField.setOnClickListener {
+                val calendar = Calendar.getInstance()
+                val parts = chore.dateAssigned.split("-")
+                val year = parts[0].toInt()
+                val month = parts[1].toInt() - 1
+                val day = parts[2].toInt()
+
+                DatePickerDialog(this, { _, y, m, d ->
+                    val selectedDate = String.format("%04d-%02d-%02d", y, m + 1, d)
+                    dateField.setText(selectedDate)
+                }, year, month, day).show()
+            }
+
+            submitButton.setOnClickListener {
+                val newAssignedUser = childList[spinner.selectedItemPosition]
+
+                val updated = chore.copy(
+                    choreText = nameField.text.toString().trim(),
+                    points = pointsField.text.toString().toIntOrNull() ?: chore.points,
+                    dateAssigned = dateField.text.toString().trim(),
+                    assignedTo = newAssignedUser.userId
+                )
+
+                RetrofitClient.instance.updateChore(updated.choreId, updated).enqueue(object : Callback<Chore> {
+                    override fun onResponse(call: Call<Chore>, response: Response<Chore>) {
+                        fetchChores()
+                        dialog.dismiss()
+                    }
+
+                    override fun onFailure(call: Call<Chore>, t: Throwable) {
+                        Toast.makeText(this@AddChore, "Edit failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            }
+
+            val cancelButton = view.findViewById<Button>(R.id.buttonCancelEditChore)
+            cancelButton.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            dialog.show()
+    }
 }
