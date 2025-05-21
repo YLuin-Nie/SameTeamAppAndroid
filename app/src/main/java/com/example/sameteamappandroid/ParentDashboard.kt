@@ -80,6 +80,12 @@ class ParentDashboard : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
+
+        binding.buttonClearDate.setOnClickListener {
+            binding.textUpcomingChoresTitle.text = getString(R.string.upcoming_chores) // ⬅️ Reset title
+            displayUpcomingChores()
+        }
+
     }
 
     private fun showPopup(layoutId: Int) {
@@ -387,6 +393,7 @@ class ParentDashboard : AppCompatActivity() {
             this,
             { _, year, month, day ->
                 val selected = LocalDate.of(year, month + 1, day)
+                binding.textUpcomingChoresTitle.text = getString(R.string.chores_for_date_format, selected.toString())
                 displayChoresOnDate(selected)
             },
             c.get(Calendar.YEAR),

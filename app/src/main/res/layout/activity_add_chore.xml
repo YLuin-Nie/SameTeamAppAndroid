@@ -73,7 +73,10 @@
             android:id="@+id/dateEditText"
             android:layout_width="match_parent"
             android:layout_height="55dp"
-            android:hint="@string/date_hint" />
+            android:hint="@string/date_hint"
+            android:focusable="false"
+            android:clickable="true" />
+
 
         <Spinner
             android:id="@+id/userSpinner"

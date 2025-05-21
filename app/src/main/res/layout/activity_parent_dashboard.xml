@@ -85,8 +85,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <!-- Chores List -->
+        <!-- Dynamic Title for Chores Section -->
         <TextView
+            android:id="@+id/textUpcomingChoresTitle"
             android:text="@string/upcoming_chores"
             android:textStyle="bold"
             android:textSize="18sp"
@@ -94,6 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+        <!-- Chore List -->
         <LinearLayout
             android:id="@+id/layoutChoreList"
             android:orientation="vertical"

@@ -9,6 +9,8 @@ import org.threeten.bp.LocalDate
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.app.DatePickerDialog
+import java.util.*
 
 class AddChore : AppCompatActivity() {
 
@@ -20,6 +22,26 @@ class AddChore : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAddChoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.dateEditText.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            val datePickerDialog = DatePickerDialog(
+                this,
+                { _, selectedYear, selectedMonth, selectedDay ->
+                    val monthStr = String.format("%02d", selectedMonth + 1)
+                    val dayStr = String.format("%02d", selectedDay)
+                    val selectedDate = "$selectedYear-$monthStr-$dayStr"
+                    binding.dateEditText.setText(selectedDate)
+                },
+                year, month, day
+            )
+
+            datePickerDialog.show()
+        }
 
         // ✅ Navigation button handlers
         binding.buttonGoDashboard.setOnClickListener {

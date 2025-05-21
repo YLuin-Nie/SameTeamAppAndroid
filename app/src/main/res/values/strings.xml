@@ -90,6 +90,7 @@
     <string name="no_upcoming_chores">No upcoming chores.</string>
     <string name="chores_for_date">Chores for</string>
     <string name="no_chores_for_date">No chores for this date.</string>
+    <string name="chores_for_date_format">Chores for %1$s</string>
 
     <!-- 🛠️ Team Management -->
     <string name="create_team">Create Team</string>
