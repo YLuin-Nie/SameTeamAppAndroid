@@ -38,6 +38,7 @@ class ChildDashboard : AppCompatActivity() {
             val today = LocalDate.now()
             val datePicker = DatePickerDialog(this, { _, year, month, day ->
                 selectedDate = LocalDate.of(year, month + 1, day)
+                binding.textUpcomingChoresTitle.text = getString(R.string.chores_for_date_format, selectedDate.toString())
                 displayChoresForSelectedDate()
             }, today.year, today.monthValue - 1, today.dayOfMonth)
             datePicker.show()
@@ -45,6 +46,7 @@ class ChildDashboard : AppCompatActivity() {
 
         binding.clearDateButton.setOnClickListener {
             selectedDate = null
+            binding.textUpcomingChoresTitle.text = getString(R.string.upcoming_chores)
             displayUpcomingChores()
         }
 
@@ -110,19 +112,21 @@ class ChildDashboard : AppCompatActivity() {
                         val totalPoints = user.totalPoints
                         val unspentPoints = user.points
 
-                        val levelIndex = levelThresholds.indexOfFirst { totalPoints < it }.let { if (it > 0) it - 1 else 0 }
-                        val levelNames = resources.getStringArray(R.array.levels_array)
+                        val thresholds = listOf(0, 200, 400, 600, 1000, 10000)
+                        val levels = listOf("Beginner", "Rising Star", "Helper Pro", "Superstar", "Legend")
+                        val colors = listOf("#cccccc", "#ccffcc", "#aaaaff", "#ffffaa", "#ffcc88")
+
+                        val levelIndex = thresholds.indexOfFirst { totalPoints < it }.let { if (it > 0) it - 1 else 0 }
 
                         binding.totalPointsText.text = getString(R.string.total_points) + " $totalPoints"
                         binding.unspentPointsText.text = getString(R.string.unspent_points_label) + " $unspentPoints"
 
-                        val adapter = ArrayAdapter(this@ChildDashboard, android.R.layout.simple_spinner_item, levelNames)
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                        binding.levelSpinner.adapter = adapter
-                        binding.levelSpinner.setSelection(levelIndex)
-                        binding.levelSpinner.isEnabled = false
+                        // ℹ️ Show Level Info
+                        binding.childLevelInfo.text = "Level ${levelIndex + 1} (${levels[levelIndex]}) - $totalPoints pts"
+                        binding.childLevelInfo.setBackgroundColor(android.graphics.Color.parseColor(colors[levelIndex]))
+                        binding.childLevelInfo.setPadding(12, 12, 12, 12)
 
-                        binding.progressBar.max = levelThresholds.getOrElse(levelIndex + 1) { levelThresholds.last() }
+                        binding.progressBar.max = thresholds.getOrElse(levelIndex + 1) { thresholds.last() }
                         binding.progressBar.progress = totalPoints
 
                         if (selectedDate != null) displayChoresForSelectedDate()
@@ -140,6 +144,7 @@ class ChildDashboard : AppCompatActivity() {
             }
         })
     }
+
 
 
     private fun displayChoresForSelectedDate() {
