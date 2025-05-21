@@ -80,22 +80,28 @@ class ChildRewards : AppCompatActivity() {
     }
 
     private fun loadCompletedChores() {
-        RetrofitClient.instance.fetchCompletedChores().enqueue(object : Callback<List<Chore>> {
-            override fun onResponse(call: Call<List<Chore>>, response: Response<List<Chore>>) {
+        RetrofitClient.instance.getUser(userId).enqueue(object : Callback<User> {
+            override fun onResponse(call: Call<User>, response: Response<User>) {
                 if (response.isSuccessful) {
-                    val userCompleted = response.body()?.filter { it.assignedTo == userId } ?: listOf()
-                    val earned = userCompleted.sumOf { it.points }
-                    val spent = redeemedRewards.sumOf { it.pointsSpent }
-                    points = earned - spent
+                    val user = response.body()
+                    points = user?.points ?: 0
                     binding.pointsTextView.text = getString(R.string.unspent_points_format, points)
                     displayRewards()
                     displayRedeemed()
+                } else {
+                    points = 0
+                    binding.pointsTextView.text = getString(R.string.unspent_points_format, points)
                 }
             }
 
-            override fun onFailure(call: Call<List<Chore>>, t: Throwable) {}
+            override fun onFailure(call: Call<User>, t: Throwable) {
+                points = 0
+                binding.pointsTextView.text = getString(R.string.unspent_points_format, points)
+            }
         })
     }
+
+
 
     private fun displayRewards() {
         binding.availableRewardsLayout.removeAllViews()
