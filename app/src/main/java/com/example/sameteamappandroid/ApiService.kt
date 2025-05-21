@@ -95,6 +95,9 @@ interface ApiService {
     @PUT("Chores/{id}")
     fun completeChore(@Path("id") id: Int, @Body updatedChore: Chore): Call<Chore>
 
+    @PUT("Chores/{id}")
+    fun updateChore(@Path("id") id: Int, @Body chore: Chore): Call<Chore>
+
     @GET("Chores/completed")
     fun fetchCompletedChores(): Call<List<Chore>>
 

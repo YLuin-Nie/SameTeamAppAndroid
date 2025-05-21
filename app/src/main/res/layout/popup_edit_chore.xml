@@ -1,0 +1,47 @@
+<!-- res/layout/popup_edit_chore.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="20dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:id="@+id/editChoreName"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:hint="@string/chore_hint" />
+
+    <EditText
+        android:id="@+id/editChorePoints"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:hint="@string/points_hint"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/editChoreDate"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:hint="@string/date_hint"
+        android:focusable="false"
+        android:clickable="true" />
+
+    <Spinner
+        android:id="@+id/editChoreSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:prompt="@string/assign_to_hint" />
+
+    <Button
+        android:id="@+id/buttonSubmitEditChore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/save" />
+
+    <Button
+        android:id="@+id/buttonCancelEditChore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel" />
+
+</LinearLayout>
